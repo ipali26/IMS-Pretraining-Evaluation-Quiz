@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IMS Internal Auditors — Pre-Training Evaluation Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root {
+    --navy:    #0f2340;
+    --blue:    #1a4a7a;
+    --accent:  #f0a500;
+    --correct: #1a7a4a;
+    --wrong:   #7a1a1a;
+    --correct-bg: #e8f7ef;
+    --wrong-bg:   #fdf0f0;
+    --light:   #f4f7fc;
+    --white:   #ffffff;
+    --border:  #d0dcea;
+    --text:    #1a2840;
+    --muted:   #5a6e8a;
+    --radius:  12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    color: white;
+    padding: 32px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content:''; position:absolute; top:-60px; right:-60px;
+    width:220px; height:220px; border-radius:50%;
+    background: rgba(240,165,0,.12);
+  }
+  .header::after {
+    content:''; position:absolute; bottom:-40px; left:-40px;
+    width:160px; height:160px; border-radius:50%;
+    background: rgba(255,255,255,.06);
+  }
+  .header-badge {
+    display:inline-block; background: var(--accent); color: var(--navy);
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.72rem;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding: 4px 14px; border-radius:20px; margin-bottom:14px;
+  }
+  .header h1 {
+    font-family:'Syne',sans-serif; font-size:clamp(1.3rem,4vw,2rem);
+    font-weight:800; line-height:1.2; margin-bottom:8px;
+  }
+  .header p { font-size:.92rem; opacity:.8; font-weight:300; letter-spacing:.02em; }
+  .standards-row {
+    display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:16px;
+  }
+  .std-tag {
+    background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);
+    color:white; font-size:.76rem; padding: 3px 11px; border-radius:20px;
+    font-family:'Syne',sans-serif; font-weight:600;
+  }
+
+  /* ── Name gate ── */
+  #nameGate {
+    max-width:480px; margin:40px auto; padding:0 16px;
+  }
+  .gate-card {
+    background:white; border-radius:var(--radius); border:1px solid var(--border);
+    padding:32px 28px; text-align:center;
+    box-shadow:0 4px 24px rgba(15,35,64,.08);
+  }
+  .gate-card h2 {
+    font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800;
+    color:var(--navy); margin-bottom:8px;
+  }
+  .gate-card p { color:var(--muted); font-size:.92rem; margin-bottom:24px; }
+  .gate-card input, .gate-card select {
+    width:100%; padding:12px 16px; margin-bottom:14px;
+    border:2px solid var(--border); border-radius:8px;
+    font-family:'DM Sans',sans-serif; font-size:.95rem; color:var(--text);
+    outline:none; transition:border-color .18s;
+  }
+  .gate-card input:focus, .gate-card select:focus { border-color:var(--blue); }
+  .gate-card select { appearance:none; background:#f4f7fc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6e8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center; }
+  .start-btn {
+    width:100%; background:linear-gradient(135deg,var(--navy),var(--blue));
+    color:white; font-family:'Syne',sans-serif; font-weight:700; font-size:1rem;
+    padding:13px; border:none; border-radius:30px; cursor:pointer;
+    transition:transform .15s, box-shadow .15s;
+    box-shadow:0 4px 16px rgba(15,35,64,.25);
+  }
+  .start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(15,35,64,.3); }
+
+  /* ── Progress ── */
+  .progress-bar {
+    background: var(--navy); padding: 10px 24px;
+    display:flex; align-items:center; gap:14px;
+    position:sticky; top:0; z-index:100;
+  }
+  .progress-label {
+    color:rgba(255,255,255,.7); font-size:.78rem; white-space:nowrap;
+    min-width:100px; font-family:'Syne',sans-serif;
+  }
+  .progress-track { flex:1; height:6px; background:rgba(255,255,255,.15); border-radius:3px; overflow:hidden; }
+  .progress-fill {
+    height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#f7c948);
+    border-radius:3px; transition:width .4s ease;
+  }
+  .score-live { color:var(--accent); font-family:'Syne',sans-serif; font-weight:700; font-size:.85rem; white-space:nowrap; }
+
+  /* ── Quiz container ── */
+  .quiz-wrap { max-width:780px; margin:0 auto; padding:24px 16px 48px; }
+
+  /* ── Question card ── */
+  .q-card {
+    background:white; border-radius:var(--radius); border:1px solid var(--border);
+    padding:24px; margin-bottom:20px; transition:box-shadow .2s;
+  }
+  .q-card:hover { box-shadow:0 4px 20px rgba(15,35,64,.08); }
+  .q-number {
+    font-family:'Syne',sans-serif; font-size:.72rem; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;
+  }
+  .q-cat {
+    display:inline-block; background:#e8eef7; color:var(--blue);
+    font-size:.68rem; font-weight:500; padding:2px 9px; border-radius:12px;
+    margin-bottom:10px; font-family:'Syne',sans-serif; letter-spacing:.05em;
+  }
+  .q-text { font-size:1rem; font-weight:500; line-height:1.55; margin-bottom:16px; }
+
+  /* ── Options ── */
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn {
+    display:flex; align-items:flex-start; gap:12px;
+    background:var(--light); border:2px solid var(--border); border-radius:8px;
+    padding:12px 14px; cursor:pointer; text-align:left;
+    font-family:'DM Sans',sans-serif; font-size:.93rem; line-height:1.4;
+    color:var(--text); transition:all .18s; width:100%;
+  }
+  .opt-btn:hover:not(:disabled) { border-color:var(--blue); background:#eef3fa; }
+  .opt-letter {
+    width:24px; height:24px; flex-shrink:0; border-radius:50%;
+    background:white; border:2px solid var(--border);
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.75rem;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--blue); transition:all .18s;
+  }
+  .opt-btn.correct { background:var(--correct-bg); border-color:var(--correct); }
+  .opt-btn.correct .opt-letter { background:var(--correct); border-color:var(--correct); color:white; }
+  .opt-btn.wrong   { background:var(--wrong-bg);   border-color:var(--wrong); }
+  .opt-btn.wrong .opt-letter   { background:var(--wrong);   border-color:var(--wrong);   color:white; }
+  .opt-btn:disabled { cursor:default; }
+
+  .feedback { display:none; margin-top:12px; padding:10px 14px; border-radius:8px; font-size:.88rem; line-height:1.45; }
+  .feedback.correct { display:block; background:var(--correct-bg); border-left:4px solid var(--correct); color:var(--correct); }
+  .feedback.wrong   { display:block; background:var(--wrong-bg);   border-left:4px solid var(--wrong);   color:var(--wrong); }
+
+  /* ── Submit ── */
+  .submit-wrap { text-align:center; padding:16px 0 32px; }
+  #submitBtn {
+    background:linear-gradient(135deg,var(--navy),var(--blue)); color:white;
+    font-family:'Syne',sans-serif; font-weight:700; font-size:1rem;
+    letter-spacing:.04em; padding:14px 40px; border:none; border-radius:30px;
+    cursor:pointer; transition:transform .15s,box-shadow .15s;
+    box-shadow:0 4px 16px rgba(15,35,64,.25);
+  }
+  #submitBtn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(15,35,64,.3); }
+  #submitBtn:disabled { opacity:.5; cursor:default; transform:none; }
+
+  /* ── Results ── */
+  #results {
+    display:none; background:white; border-radius:var(--radius);
+    border:1px solid var(--border); padding:32px 24px; margin-top:24px;
+    animation:fadeUp .4s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .result-hero { text-align:center; margin-bottom:28px; }
+  .result-score-ring {
+    width:120px; height:120px; border-radius:50%;
+    background:conic-gradient(var(--accent) var(--pct,0deg), #e0e8f0 0);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 16px; position:relative;
+  }
+  .result-score-ring::before {
+    content:''; position:absolute; inset:12px; border-radius:50%; background:white;
+  }
+  .result-score-num {
+    font-family:'Syne',sans-serif; font-weight:800; font-size:1.6rem;
+    color:var(--navy); position:relative; z-index:1;
+  }
+  .result-grade { font-family:'Syne',sans-serif; font-weight:800; font-size:1.6rem; margin-bottom:4px; }
+  .result-sub { color:var(--muted); font-size:.92rem; }
+
+  .breakdown { margin-top:24px; }
+  .breakdown h3 {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:1rem;
+    color:var(--navy); margin-bottom:14px; padding-bottom:8px;
+    border-bottom:2px solid var(--light);
+  }
+  .bk-row {
+    padding:10px 0; border-bottom:1px solid var(--light);
+    font-size:.88rem;
+  }
+  .bk-row:last-child { border-bottom:none; }
+  .bk-top { display:grid; grid-template-columns:1fr auto auto auto; gap:8px; align-items:center; }
+  .bk-cat { font-weight:500; }
+  .bk-correct { color:var(--correct); font-weight:600; }
+  .bk-wrong   { color:var(--wrong);   font-weight:600; }
+  .bk-total   { color:var(--muted); }
+  .bk-mini-bar { height:6px; border-radius:3px; background:var(--light); margin-top:6px; overflow:hidden; }
+  .bk-mini-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--correct),#2ec97a); transition:width .6s .2s ease; }
+
+  /* ── Email status ── */
+  .email-status {
+    margin-top:20px; padding:12px 16px; border-radius:8px;
+    font-size:.88rem; text-align:center; display:none;
+  }
+  .email-status.sending { display:block; background:#e8eef7; color:var(--blue); }
+  .email-status.sent    { display:block; background:var(--correct-bg); color:var(--correct); border:1px solid var(--correct); }
+  .email-status.failed  { display:block; background:var(--wrong-bg); color:var(--wrong); border:1px solid var(--wrong); }
+
+  .retry-btn {
+    display:inline-block; margin-top:24px;
+    background:var(--light); color:var(--navy);
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.88rem;
+    padding:10px 28px; border-radius:24px; border:2px solid var(--border);
+    cursor:pointer; transition:all .18s;
+  }
+  .retry-btn:hover { border-color:var(--blue); background:#eef3fa; }
+
+  @media(max-width:500px){
+    .q-card { padding:18px 14px; }
+    .header { padding:24px 16px 20px; }
+    .gate-card { padding:24px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">Pre-Training Evaluation</div>
+  <h1>IMS Internal Auditors Bootcamp</h1>
+  <p>50-Question Multiple Choice Quiz &nbsp;·&nbsp; 25th – 26th May 2026</p>
+  <div class="standards-row">
+    <span class="std-tag">ISO 9001:2015</span>
+    <span class="std-tag">ISO 14001:2015</span>
+    <span class="std-tag">ISO 45001:2018</span>
+    <span class="std-tag">ISO 19011:2018</span>
+    <span class="std-tag">PDCA</span>
+  </div>
+</div>
+
+<!-- Name Gate -->
+<div id="nameGate">
+  <div class="gate-card">
+    <h2>Before You Begin</h2>
+    <p>Please enter your details so your results can be recorded and sent to the training coordinator.</p>
+    <input type="text"   id="participantName"  placeholder="Full Name *" />
+    <input type="text"   id="participantDept"  placeholder="Department *" />
+    <select id="participantRole">
+      <option value="" disabled selected>Participation Role *</option>
+      <option value="Auditor Candidate">Auditor Candidate (to be certified)</option>
+      <option value="Observer">Observer</option>
+    </select>
+    <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+</div>
+
+<!-- Progress Bar (hidden until quiz starts) -->
+<div class="progress-bar" id="progressBar" style="display:none">
+  <span class="progress-label" id="progLabel">0 of 50</span>
+  <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+  <span class="score-live" id="scoreLive">Score: 0</span>
+</div>
+
+<!-- Quiz Body -->
+<div class="quiz-wrap" id="quizWrap" style="display:none">
+  <div id="quizBody"></div>
+  <div class="submit-wrap">
+    <button id="submitBtn" onclick="submitQuiz()">Submit &amp; See My Score</button>
+  </div>
+  <div id="results"></div>
+</div>
+
+<script>
+// ── EmailJS config ── replace with your real keys after signing up at emailjs.com ──
+const EMAILJS_SERVICE_ID  = "YOUR_SERVICE_ID";   // e.g. "service_abc123"
+const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";  // e.g. "template_xyz789"
+const EMAILJS_PUBLIC_KEY  = "YOUR_PUBLIC_KEY";   // e.g. "abcDEFghiJKL"
+const RECIPIENT_EMAIL     = "george.ipalibo@pegisglobal.com";
+
+// ── Participant info ──
+let pName = '', pDept = '', pRole = '';
+
+// ── Questions ──
+const QUESTIONS = [
+  {cat:"IMS Overview",q:"What does IMS stand for in the context of management systems?",
+   opts:["Integrated Monitoring System","Integrated Management System","Internal Management Standard","International Measurement System"],ans:1},
+  {cat:"IMS Overview",q:"Which three ISO standards are combined in a Quality, Health, Safety and Environment (QHSE) Integrated Management System?",
+   opts:["ISO 9001, ISO 14001, ISO 31000","ISO 9001, ISO 45001, ISO 14001","ISO 9001, ISO 50001, ISO 27001","ISO 14001, ISO 45001, ISO 31000"],ans:1},
+  {cat:"IMS Overview",q:"ISO 9001:2015 is primarily focused on which of the following?",
+   opts:["Environmental performance","Occupational health and safety","Quality management and customer requirements","Information security"],ans:2},
+  {cat:"IMS Overview",q:"ISO 14001:2015 is used to manage which of the following?",
+   opts:["Product quality","Environmental aspects and impacts","Worker health and safety","Business continuity"],ans:1},
+  {cat:"IMS Overview",q:"ISO 45001:2018 replaces which earlier occupational health and safety standard?",
+   opts:["ISO 18001","OHSAS 18001","ISO 45000","BS 8800"],ans:1},
+  {cat:"IMS Overview",q:"What is the primary benefit of implementing an Integrated Management System (IMS)?",
+   opts:["It eliminates the need for internal audits","It reduces duplication and integrates processes across multiple standards","It replaces all regulatory requirements","It is only required for large organisations"],ans:1},
+  {cat:"IMS Overview",q:"Which term in an ISO standard indicates a mandatory requirement?",
+   opts:["Should","May","Shall","Can"],ans:2},
+  {cat:"IMS Overview",q:"Which term in an ISO standard indicates a recommendation (not mandatory)?",
+   opts:["Shall","Should","Must","Will"],ans:1},
+  {cat:"IMS Overview",q:"What is the High Level Structure (Annex SL) in ISO standards designed to achieve?",
+   opts:["A common framework enabling easy integration of multiple ISO management system standards","A checklist for certification audits","A regulatory compliance tool","A financial reporting structure"],ans:0},
+  {cat:"IMS Overview",q:"What is meant by 'continual improvement' in the context of an IMS?",
+   opts:["A one-time project to improve the system","An ongoing effort to enhance the management system's performance over time","Annual certification renewal","Replacing the management system every five years"],ans:1},
+
+  {cat:"PDCA Cycle",q:"What does PDCA stand for?",
+   opts:["Plan, Deploy, Check, Assess","Plan, Do, Check, Act","Prepare, Do, Control, Audit","Process, Document, Confirm, Approve"],ans:1},
+  {cat:"PDCA Cycle",q:"Who is credited with developing the PDCA cycle (also called the Deming Cycle)?",
+   opts:["Joseph Juran","Philip Crosby","W. Edwards Deming","Kaoru Ishikawa"],ans:2},
+  {cat:"PDCA Cycle",q:"In the PDCA cycle, what does the 'Plan' phase involve?",
+   opts:["Conducting audits","Setting objectives and determining processes needed to deliver results","Monitoring KPIs","Taking corrective actions"],ans:1},
+  {cat:"PDCA Cycle",q:"In the PDCA cycle, what does the 'Do' phase involve?",
+   opts:["Establishing policies","Implementing the planned processes","Evaluating results against objectives","Improving the system based on findings"],ans:1},
+  {cat:"PDCA Cycle",q:"In the PDCA cycle, what does the 'Check' phase involve?",
+   opts:["Setting new objectives","Hiring staff","Monitoring and measuring processes against objectives and reporting results","Implementing new processes"],ans:2},
+  {cat:"PDCA Cycle",q:"In the PDCA cycle, what does the 'Act' phase involve?",
+   opts:["Documenting all processes","Taking actions to continually improve performance","Conducting training","Planning the next audit"],ans:1},
+  {cat:"PDCA Cycle",q:"Which ISO 14001:2015 clause directly relates to the 'Check' phase of the PDCA cycle?",
+   opts:["Clause 5 – Leadership","Clause 6 – Planning","Clause 9 – Performance Evaluation","Clause 7 – Support"],ans:2},
+  {cat:"PDCA Cycle",q:"The PDCA cycle is described as applicable to which management system standards?",
+   opts:["ISO 9001:2015 only","ISO 14001:2015 only","ISO 9001, ISO 14001 and ISO 45001","ISO 45001 and ISO 14001 only"],ans:2},
+
+  {cat:"ISO Clauses",q:"ISO 9001:2015 Clause 4 is titled:",
+   opts:["Leadership","Planning","Context of the Organization","Support"],ans:2},
+  {cat:"ISO Clauses",q:"Under ISO 9001:2015, which clause deals with 'Leadership and Commitment'?",
+   opts:["Clause 4","Clause 5","Clause 6","Clause 7"],ans:1},
+  {cat:"ISO Clauses",q:"What is required under Clause 6 (Planning) of ISO 9001:2015?",
+   opts:["Management review","Actions to address risks and opportunities, quality objectives, and planning of changes","Competence and training","Internal audits"],ans:1},
+  {cat:"ISO Clauses",q:"ISO 14001:2015 Clause 6.1.2 requires the organisation to identify its:",
+   opts:["Legal compliance obligations","Environmental aspects and determine significant environmental aspects","Emergency response plan","Internal audit programme"],ans:1},
+  {cat:"ISO Clauses",q:"Which clause of ISO 14001:2015 deals with 'Emergency Preparedness and Response'?",
+   opts:["Clause 6.1","Clause 8.2","Clause 9.1","Clause 10.2"],ans:1},
+  {cat:"ISO Clauses",q:"ISO 45001:2018 Clause 5.4 requires organisations to ensure worker:",
+   opts:["Financial compensation","Participation and consultation","Training certification","Equipment inspection"],ans:1},
+  {cat:"ISO Clauses",q:"Under ISO 9001:2015 Clause 9.3, what must top management conduct at planned intervals?",
+   opts:["Customer satisfaction surveys","Management review of the QMS","Risk assessments","External audits"],ans:1},
+  {cat:"ISO Clauses",q:"Which clause in ISO 14001:2015 covers 'Compliance Obligations'?",
+   opts:["Clause 6.1.3","Clause 7.5","Clause 8.1","Clause 9.2"],ans:0},
+  {cat:"ISO Clauses",q:"Clause 7.5 across ISO 9001, 14001 and 45001 refers to:",
+   opts:["Internal audits","Management review","Documented information (records and documents)","Competence"],ans:2},
+  {cat:"ISO Clauses",q:"Under ISO 9001:2015 Clause 8.1, the organisation shall plan, implement and control its:",
+   opts:["Management reviews","Operational processes needed to meet product and service requirements","Training programmes","Internal audit schedule"],ans:1},
+  {cat:"ISO Clauses",q:"Clause 10 across all three ISO standards relates to:",
+   opts:["Support and resources","Performance evaluation","Improvement (including corrective action and continual improvement)","Planning"],ans:2},
+
+  {cat:"Auditing",q:"Which ISO standard provides guidelines for auditing management systems?",
+   opts:["ISO 9000:2015","ISO 19011:2018","ISO 31000:2018","ISO 14004:2016"],ans:1},
+  {cat:"Auditing",q:"How is an audit defined in ISO 9000:2015?",
+   opts:["A scheduled inspection of equipment","A systematic, independent and documented process for obtaining objective evidence to determine audit criteria fulfilment","A financial review of company accounts","A regulatory inspection by a government body"],ans:1},
+  {cat:"Auditing",q:"Which of the following is NOT one of the principles of auditing per ISO 19011?",
+   opts:["Integrity","Profitability","Confidentiality","Fair Presentation"],ans:1},
+  {cat:"Auditing",q:"What is a first-party audit?",
+   opts:["An audit conducted by a certification body","An audit conducted by a customer on a supplier","An internal audit conducted by the organisation on itself","An audit conducted by a government regulator"],ans:2},
+  {cat:"Auditing",q:"What is a third-party audit?",
+   opts:["An audit conducted by the organisation on a supplier","An internal audit","An audit conducted by an independent certification or regulatory body","A joint audit between two customers"],ans:2},
+  {cat:"Auditing",q:"What is the principle of 'independence' in auditing?",
+   opts:["The auditor is free to ask any question","The auditor does not audit their own work, ensuring impartiality and objectivity","The auditor is paid independently","The audit is conducted without a plan"],ans:1},
+  {cat:"Auditing",q:"What is the purpose of a combined audit?",
+   opts:["To audit only one management system at a time","To audit two or more management systems of the same organisation simultaneously","To audit a supplier and a customer at the same time","To replace the need for third-party audits"],ans:1},
+  {cat:"Auditing",q:"Which of the following best describes 'objective evidence' in an audit?",
+   opts:["The auditor's personal opinion","Data or information that can be verified, based on facts obtained through observation, measurement or testing","A verbal statement from the auditee","An assumption based on experience"],ans:1},
+
+  {cat:"Audit Process",q:"What are the three main stages of an internal audit?",
+   opts:["Planning, Conducting, Closing","Pre-audit (Planning), On-site (Conducting), Reporting","Preparation, Implementation, Review","Scheduling, Inspection, Certification"],ans:1},
+  {cat:"Audit Process",q:"What is the primary purpose of an audit checklist?",
+   opts:["To replace the audit plan","To serve as a systematic guide to control the pace, depth and sequence of an audit","To document non-conformances","To replace the need for interviews"],ans:1},
+  {cat:"Audit Process",q:"Which questioning technique is commonly used during audit interviews?",
+   opts:["3C Method","5W+1H (What, Where, When, Why, Who, How)","STAR Method","A-B-C Analysis"],ans:1},
+  {cat:"Audit Process",q:"What is the difference between an 'Audit Programme' and an 'Audit Plan'?",
+   opts:["They are the same document","An Audit Programme shows the spread of audits over a period of time; an Audit Plan details a specific audit (dates, times, auditors, scope)","An Audit Plan is for internal audits only; an Audit Programme is for external audits","An Audit Programme is prepared by the auditee; an Audit Plan by the auditor"],ans:1},
+  {cat:"Audit Process",q:"During Stage 1 (Pre-audit), the auditor conducts a document review. The documents reviewed should be:",
+   opts:["Confidential and not shared","Complete, Correct and Consistent","Approved by a regulator","At least 5 years old"],ans:1},
+  {cat:"Audit Process",q:"What is the purpose of the opening meeting at the start of an on-site audit?",
+   opts:["To present audit findings and non-conformances","To introduce the audit team, confirm the audit scope, objectives and criteria, and agree the schedule with the auditee","To close out previous audit findings","To conduct the document review"],ans:1},
+  {cat:"Audit Process",q:"What is a 'Non-Conformance' (NC) in the context of an audit?",
+   opts:["A suggestion for improvement","A risk that has not yet occurred","A failure to fulfil a specified requirement of the management system standard or documented procedure","A compliment to the auditee"],ans:2},
+  {cat:"Audit Process",q:"What is the difference between a 'Major' and a 'Minor' non-conformance?",
+   opts:["There is no difference","A Major NC is a complete absence or total breakdown of a requirement; a Minor NC is an isolated lapse or partial non-fulfilment","A Major NC is raised by external auditors only; a Minor NC by internal auditors","A Major NC requires replacement of staff; a Minor NC requires retraining"],ans:1},
+  {cat:"Audit Process",q:"What should an effective non-conformance statement include?",
+   opts:["The auditor's personal recommendation","The ISO clause reference, the specific requirement, and the objective evidence of non-fulfilment","Only the evidence observed","Only the corrective action required"],ans:1},
+  {cat:"Audit Process",q:"What is the difference between a 'correction' and a 'corrective action'?",
+   opts:["They are the same thing","A correction eliminates the nonconformity immediately; a corrective action eliminates the root cause to prevent recurrence","A correction is for major NCs; a corrective action is for minor NCs","A corrective action is completed by the auditor; a correction by management"],ans:1},
+  {cat:"Audit Process",q:"What is the purpose of the closing meeting at the end of an on-site audit?",
+   opts:["To begin corrective actions","To present audit findings, non-conformances and the audit conclusion to the auditee","To plan the next audit","To distribute the final audit report"],ans:1},
+  {cat:"Audit Process",q:"What is an audit follow-up audit designed to verify?",
+   opts:["Whether the auditee has passed the certification","That corrective actions taken on previous audit findings are effective and have been implemented","That the audit report has been distributed","That the auditor is competent"],ans:1},
+  {cat:"Audit Process",q:"Which of the following is an example of good auditor practice?",
+   opts:["Asking multiple questions at the same time","Answering your own questions when the auditee is slow to respond","Allowing the auditee to dictate the pace of the audit","Asking open-ended questions, listening actively, and keeping to the checklist"],ans:3},
+  {cat:"Audit Process",q:"In an oil and gas services context, which of the following would most likely be identified as a significant environmental aspect?",
+   opts:["Use of stationery in the office","Hydrocarbon spills and releases during wellhead maintenance operations","Staff car parking","Printing of audit reports"],ans:1},
+];
+
+let answered = new Array(QUESTIONS.length).fill(false);
+let correct   = new Array(QUESTIONS.length).fill(false);
+
+// ── Gate ─────────────────────────────────────────────────────────────────────
+function startQuiz() {
+  pName = document.getElementById('participantName').value.trim();
+  pDept = document.getElementById('participantDept').value.trim();
+  pRole = document.getElementById('participantRole').value;
+  if (!pName || !pDept || !pRole) {
+    alert('Please fill in all fields before starting the quiz.');
+    return;
+  }
+  document.getElementById('nameGate').style.display    = 'none';
+  document.getElementById('progressBar').style.display = 'flex';
+  document.getElementById('quizWrap').style.display    = 'block';
+  render();
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const body = document.getElementById('quizBody');
+  body.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card'; card.id = `card-${qi}`;
+    card.innerHTML = `
+      <div class="q-number">Question ${qi+1} of ${QUESTIONS.length}</div>
+      <span class="q-cat">${q.cat}</span>
+      <div class="q-text">${q.q}</div>
+      <div class="options" id="opts-${qi}">
+        ${q.opts.map((o,oi)=>`
+          <button class="opt-btn" id="opt-${qi}-${oi}" onclick="choose(${qi},${oi})">
+            <span class="opt-letter">${letters[oi]}</span><span>${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="feedback" id="fb-${qi}"></div>`;
+    body.appendChild(card);
+  });
+}
+
+// ── Answer ────────────────────────────────────────────────────────────────────
+function choose(qi, oi) {
+  if (answered[qi]) return;
+  answered[qi] = true;
+  const isCorrect = oi === QUESTIONS[qi].ans;
+  correct[qi] = isCorrect;
+  for (let i=0;i<QUESTIONS[qi].opts.length;i++) {
+    const btn = document.getElementById(`opt-${qi}-${i}`);
+    btn.disabled = true;
+    if (i===QUESTIONS[qi].ans) btn.classList.add('correct');
+    else if (i===oi && !isCorrect) btn.classList.add('wrong');
+  }
+  const fb = document.getElementById(`fb-${qi}`);
+  if (isCorrect) {
+    fb.className='feedback correct'; fb.innerHTML='✓ Correct!';
+  } else {
+    fb.className='feedback wrong';
+    fb.innerHTML=`✗ Incorrect. The correct answer is: <strong>${QUESTIONS[qi].opts[QUESTIONS[qi].ans]}</strong>`;
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const done  = answered.filter(Boolean).length;
+  const score = correct.filter(Boolean).length;
+  document.getElementById('progLabel').textContent  = `${done} of ${QUESTIONS.length}`;
+  document.getElementById('progFill').style.width   = `${(done/QUESTIONS.length)*100}%`;
+  document.getElementById('scoreLive').textContent  = `Score: ${score}`;
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function submitQuiz() {
+  const score = correct.filter(Boolean).length;
+  const total = QUESTIONS.length;
+  const pct   = Math.round((score/total)*100);
+
+  const cats = {};
+  QUESTIONS.forEach((q,i)=>{
+    if(!cats[q.cat]) cats[q.cat]={c:0,t:0};
+    cats[q.cat].t++;
+    if(correct[i]) cats[q.cat].c++;
+  });
+
+  const grade = pct>=80?'Excellent':pct>=60?'Good':pct>=40?'Fair':'Needs Work';
+  const gradeColor = pct>=80?'#1a7a4a':pct>=60?'#2e75b6':pct>=40?'#d4820a':'#7a1a1a';
+  const deg = Math.round(pct*3.6);
+
+  const bkHTML = Object.entries(cats).map(([cat,v])=>{
+    const p=Math.round((v.c/v.t)*100);
+    return `<div class="bk-row">
+      <div class="bk-top">
+        <span class="bk-cat">${cat}</span>
+        <span class="bk-correct">${v.c}✓</span>
+        <span class="bk-wrong">${v.t-v.c}✗</span>
+        <span class="bk-total">${v.t}Q</span>
+      </div>
+      <div class="bk-mini-bar"><div class="bk-mini-fill" style="width:${p}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Build plain-text breakdown for email
+  const bkText = Object.entries(cats).map(([cat,v])=>
+    `  ${cat}: ${v.c}/${v.t} correct (${Math.round((v.c/v.t)*100)}%)`
+  ).join('\n');
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = `
+    <div class="result-hero">
+      <div class="result-score-ring" style="--pct:${deg}deg">
+        <span class="result-score-num">${pct}%</span>
+      </div>
+      <div class="result-grade" style="color:${gradeColor}">${grade}</div>
+      <div class="result-sub">You scored <strong>${score}</strong> out of <strong>${total}</strong> questions</div>
+    </div>
+    <div class="breakdown">
+      <h3>Score Breakdown by Topic</h3>
+      ${bkHTML}
+    </div>
+    <div class="email-status sending" id="emailStatus">
+      ⏳ Sending your results to the training coordinator…
+    </div>
+    <div style="text-align:center">
+      <button class="retry-btn" onclick="location.reload()">↺ Retake Quiz</button>
+    </div>`;
+
+  resultsEl.style.display = 'block';
+  document.getElementById('submitBtn').disabled = true;
+  resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
+
+  // ── Send email via EmailJS ──
+  const timestamp = new Date().toLocaleString('en-GB', {
+    day:'2-digit',month:'short',year:'numeric',
+    hour:'2-digit',minute:'2-digit'
+  });
+
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_email:    RECIPIENT_EMAIL,
+    to_name:     "George Ipalibo",
+    participant: pName,
+    department:  pDept,
+    role:        pRole,
+    score:       score,
+    total:       total,
+    percentage:  pct + '%',
+    grade:       grade,
+    breakdown:   bkText,
+    timestamp:   timestamp,
+    subject:     `IMS Quiz Result — ${pName} — ${pct}% (${grade})`,
+  }).then(()=>{
+    const st = document.getElementById('emailStatus');
+    st.className='email-status sent';
+    st.innerHTML='✓ Results sent successfully to the training coordinator.';
+  }).catch(err=>{
+    const st = document.getElementById('emailStatus');
+    st.className='email-status failed';
+    st.innerHTML=`✗ Could not send results automatically. Please screenshot this page and send to george.ipalibo@pegisglobal.com`;
+    console.error('EmailJS error:',err);
+  });
+}
+</script>
+</body>
+</html>
