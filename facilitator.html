@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Myth Busters — Facilitator</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0f4ff;--white:#ffffff;--navy:#0f2340;--blue:#1565c0;
+  --purple:#7c3aed;--green:#00c853;--red:#f50057;--amber:#ff6d00;
+  --yellow:#ffd600;--pink:#e91e8c;--border:#e0e8f8;--muted:#7a90b0;
+  --text:#0f2340;--shadow:0 4px 24px rgba(15,35,64,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── Screens ── */
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+
+/* ══ SETUP SCREEN ══ */
+#setupScreen{background:linear-gradient(135deg,#e8f0fe 0%,#fce4ec 50%,#e8f5e9 100%);}
+.setup-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,7vw,4rem);
+  letter-spacing:.06em;text-align:center;line-height:1;margin-bottom:6px;
+  background:linear-gradient(135deg,var(--blue),var(--purple),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.setup-sub{color:var(--muted);font-size:.9rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:28px;}
+.setup-card{background:white;border-radius:24px;box-shadow:var(--shadow);padding:28px;width:100%;max-width:440px;}
+.setup-card h2{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.08em;color:var(--navy);margin-bottom:6px;}
+.setup-card p{color:var(--muted);font-size:.85rem;margin-bottom:18px;line-height:1.5;}
+.field-label{display:block;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin-bottom:5px;}
+.field-input{width:100%;padding:12px 14px;margin-bottom:14px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s;background:#f8faff;}
+.field-input:focus{border-color:var(--blue);}
+.add-team-btn{width:100%;padding:11px;background:#f0f4ff;border:2px dashed var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:14px;transition:all .18s;}
+.add-team-btn:hover{border-color:var(--blue);color:var(--blue);}
+.teams-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.team-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px solid;font-weight:700;font-size:.92rem;}
+.remove-btn{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1rem;opacity:.5;transition:opacity .15s;}
+.remove-btn:hover{opacity:1;}
+.start-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:white;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.3);transition:transform .15s,box-shadow .15s;}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,58,237,.45);}
+
+/* ══ FACILITATOR DASHBOARD ══ */
+#dashScreen{background:var(--bg);justify-content:flex-start;padding:0;}
+.dash-header{
+  width:100%;background:var(--navy);padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  position:sticky;top:0;z-index:50;
+}
+.dh-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;color:var(--yellow);}
+.dh-badge{
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  padding:4px 12px;border-radius:20px;
+}
+.dh-status{
+  font-size:.78rem;color:var(--yellow);font-weight:700;
+  display:flex;align-items:center;gap:5px;
+}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+
+.dash-body{width:100%;max-width:960px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px;}
+
+/* ── Current question card ── */
+.q-card{background:white;border-radius:18px;box-shadow:var(--shadow);padding:24px;position:relative;overflow:hidden;}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--pink));}
+.q-round{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.q-text{font-size:clamp(1rem,2.5vw,1.3rem);font-weight:800;line-height:1.4;color:var(--navy);margin-bottom:20px;}
+.q-answer-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-weight:700;font-size:.88rem;margin-bottom:16px;}
+.ans-true{background:#e8f5e9;color:#1b5e20;border:2px solid var(--green);}
+.ans-false{background:#fce4ec;color:#880e4f;border:2px solid var(--red);}
+
+/* Timer bar */
+.t-wrap{margin-bottom:16px;}
+.t-track{width:100%;height:12px;background:#e8eef8;border-radius:6px;overflow:hidden;}
+.t-fill{height:100%;border-radius:6px;transition:width .1s linear,background .3s;}
+.t-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.t-label{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;color:var(--navy);}
+.t-countdown{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--navy);}
+
+/* Reveal & Next */
+.ctrl-row{display:flex;gap:12px;flex-wrap:wrap;}
+.reveal-btn{
+  flex:1;min-width:140px;padding:13px;border:none;border-radius:12px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.08em;
+  cursor:pointer;transition:all .18s;
+}
+.reveal-true{background:#e8f5e9;color:#1b5e20;border:2px solid var(--green);}
+.reveal-true:hover{background:var(--green);color:white;}
+.reveal-false{background:#fce4ec;color:#880e4f;border:2px solid var(--red);}
+.reveal-false:hover{background:var(--red);color:white;}
+.next-q-btn{
+  flex:1;min-width:140px;padding:13px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  border:none;border-radius:12px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.08em;
+  color:white;cursor:pointer;
+  box-shadow:0 4px 14px rgba(124,58,237,.3);
+  transition:transform .15s,box-shadow .15s;display:none;
+}
+.next-q-btn:hover{transform:translateY(-2px);}
+.next-q-btn.show{display:block;}
+
+/* ── Leaderboard ── */
+.lb-card{background:white;border-radius:18px;box-shadow:var(--shadow);padding:20px;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.1em;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.lb-row{
+  display:grid;grid-template-columns:36px 1fr auto auto auto;gap:8px;align-items:center;
+  padding:10px 12px;border-radius:10px;margin-bottom:6px;
+  transition:background .2s;
+}
+.lb-row:last-child{margin:0;}
+.lb-row.gold{background:#fffde7;}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;text-align:center;}
+.lb-name{font-weight:800;font-size:.95rem;}
+.lb-correct{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--green);font-weight:700;}
+.lb-answered{font-size:.75rem;color:var(--muted);}
+.lb-pts{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;color:var(--amber);}
+.lb-bar-wrap{grid-column:1/-1;padding:0 4px;}
+.lb-bar-track{height:5px;background:#f0f4ff;border-radius:3px;overflow:hidden;}
+.lb-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+
+/* ── Responses live ── */
+.resp-card{background:white;border-radius:18px;box-shadow:var(--shadow);padding:20px;}
+.resp-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:var(--navy);margin-bottom:12px;}
+.resp-grid{display:flex;flex-wrap:wrap;gap:10px;}
+.resp-chip{
+  padding:8px 16px;border-radius:20px;font-weight:700;font-size:.85rem;
+  display:flex;align-items:center;gap:6px;border:2px solid;
+  transition:all .3s;
+}
+.resp-pending{background:#f8faff;border-color:var(--border);color:var(--muted);}
+.resp-in{border-color:var(--amber);background:#fff8e1;color:#e65100;animation:popIn .3s cubic-bezier(.34,1.56,.64,1);}
+.resp-correct{border-color:var(--green);background:#e8f5e9;color:#1b5e20;}
+.resp-wrong{border-color:var(--red);background:#fce4ec;color:#880e4f;}
+@keyframes popIn{from{transform:scale(.7)}to{transform:scale(1)}}
+
+/* feedback after reveal */
+.reveal-feedback{
+  border-radius:12px;padding:14px 16px;display:none;
+  align-items:flex-start;gap:10px;font-size:.9rem;font-weight:600;line-height:1.5;margin-top:12px;
+}
+.reveal-feedback.show{display:flex;}
+.reveal-feedback.correct{background:#e8f5e9;border:2px solid var(--green);color:#1b5e20;}
+.reveal-feedback.wrong{background:#fce4ec;border:2px solid var(--red);color:#880e4f;}
+.rf-icon{font-size:1.4rem;flex-shrink:0;}
+
+/* ══ FINAL SCREEN ══ */
+#finalScreen{background:linear-gradient(135deg,#fffde7 0%,#e3f2fd 50%,#fce4ec 100%);}
+.trophy{font-size:5rem;animation:float 3s ease-in-out infinite;margin-bottom:8px;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.win-label{font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.win-name{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,9vw,5rem);
+  letter-spacing:.06em;line-height:1;margin-bottom:4px;
+  background:linear-gradient(135deg,var(--amber),var(--yellow));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.win-score{color:var(--muted);font-size:.95rem;margin-bottom:32px;}
+.final-table{background:white;border-radius:20px;box-shadow:var(--shadow);width:100%;max-width:520px;overflow:hidden;margin-bottom:28px;}
+.ft-head{background:var(--navy);padding:12px 20px;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.1em;color:var(--yellow);display:grid;grid-template-columns:44px 1fr auto auto;gap:8px;}
+.ft-row{padding:13px 20px;border-bottom:1px solid #f0f4ff;display:grid;grid-template-columns:44px 1fr auto auto;gap:8px;align-items:center;}
+.ft-row:last-child{border:none;}
+.ft-row.gold{background:#fffde7;}
+.ft-place{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;text-align:center;}
+.ft-name{font-weight:800;}
+.ft-c{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--green);font-weight:700;}
+.ft-p{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;color:var(--amber);}
+.pa-btn{padding:13px 44px;background:transparent;border:3px solid var(--navy);border-radius:50px;color:var(--navy);font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.1em;cursor:pointer;transition:all .2s;}
+.pa-btn:hover{background:var(--navy);color:white;}
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div class="screen active" id="setupScreen">
+  <div class="setup-logo">AUDIT<br>MYTH BUSTERS</div>
+  <div class="setup-sub">Facilitator Control Panel</div>
+  <div class="setup-card">
+    <h2>⚙️ Game Setup</h2>
+    <p>Add the team names that will be playing. Teams will register on their own devices using the Team QR code. Add them here so the leaderboard is ready.</p>
+    <label class="field-label">Add Team Name</label>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <input class="field-input" style="margin:0;flex:1" type="text" id="teamInp" placeholder="e.g. Team Alpha" maxlength="24" onkeydown="if(event.key==='Enter')addTeam()"/>
+      <button onclick="addTeam()" style="padding:12px 18px;background:var(--blue);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap;">+ Add</button>
+    </div>
+    <div class="teams-list" id="teamsList"></div>
+    <button class="start-btn" onclick="launchGame()">LAUNCH GAME →</button>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="screen" id="dashScreen">
+  <div class="dash-header">
+    <span class="dh-title">🔍 MYTH BUSTERS — FACILITATOR</span>
+    <span class="dh-badge" id="dhBadge">Q 1 / 20</span>
+    <span class="dh-status"><span class="pulse"></span> LIVE</span>
+  </div>
+
+  <div class="dash-body">
+
+    <!-- Question -->
+    <div class="q-card">
+      <div class="q-round" id="qRound">Round 1</div>
+      <div class="q-text"  id="qText">Loading…</div>
+      <div class="t-wrap">
+        <div class="t-row">
+          <span class="t-label">Time Remaining</span>
+          <span class="t-countdown" id="tCountdown">10.0s</span>
+        </div>
+        <div class="t-track"><div class="t-fill" id="tFill" style="width:100%"></div></div>
+      </div>
+      <div class="ctrl-row" id="ctrlRow">
+        <button class="reveal-btn reveal-true"  onclick="reveal(true)">✅ REVEAL: TRUE</button>
+        <button class="reveal-btn reveal-false" onclick="reveal(false)">❌ REVEAL: FALSE</button>
+      </div>
+      <div class="reveal-feedback" id="revealFb">
+        <span class="rf-icon" id="rfIcon"></span>
+        <span id="rfText"></span>
+      </div>
+      <button class="next-q-btn" id="nextQBtn" onclick="nextQ()">NEXT QUESTION →</button>
+    </div>
+
+    <!-- Live responses -->
+    <div class="resp-card">
+      <div class="resp-title">⚡ Live Responses</div>
+      <div class="resp-grid" id="respGrid"></div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="lb-card">
+      <div class="lb-title">🏆 Leaderboard</div>
+      <div id="lbRows"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ FINAL ══ -->
+<div class="screen" id="finalScreen">
+  <div class="trophy">🏆</div>
+  <div class="win-label">Overall Winner</div>
+  <div class="win-name" id="winName">—</div>
+  <div class="win-score" id="winScore"></div>
+  <div class="final-table">
+    <div class="ft-head"><span>#</span><span>Team</span><span>✓</span><span>Pts</span></div>
+    <div id="ftRows"></div>
+  </div>
+  <button class="pa-btn" onclick="location.reload()">↺ PLAY AGAIN</button>
+</div>
+
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<script type="module">
+import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, update, onValue, remove }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyB1k3crQUim9Wqxg93w-FSnCdL98uv9VUg",
+  authDomain:"ims-mythbusters.firebaseapp.com",
+  databaseURL:"https://ims-mythbusters-default-rtdb.firebaseio.com",
+  projectId:"ims-mythbusters",
+  storageBucket:"ims-mythbusters.firebasestorage.app",
+  messagingSenderId:"747989755844",
+  appId:"1:747989755844:web:100a50f74a216daeafa691"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+const PALETTE = [
+  {bg:'#1565c0',light:'#e3f2fd',text:'#1565c0'},
+  {bg:'#7c3aed',light:'#ede9fe',text:'#7c3aed'},
+  {bg:'#e91e8c',light:'#fce4ec',text:'#c2185b'},
+  {bg:'#ff6d00',light:'#fff3e0',text:'#e65100'},
+  {bg:'#00897b',light:'#e0f2f1',text:'#00695c'},
+  {bg:'#c62828',light:'#ffebee',text:'#b71c1c'},
+];
+const EMOJIS  = ['🦁','🐯','🦊','🐺','🦅','🐉'];
+const MEDALS  = ['🥇','🥈','🥉','4','5','6'];
+const TIMER   = 10;
+const MAX_PTS = 5;
+
+const QUESTIONS = [
+  {round:"Round 1 — What is an Audit?",q:"An internal audit is the same as a financial audit.",ans:false,exp:"A financial audit examines accounts. An IMS internal audit evaluates whether the management system is effectively implemented."},
+  {round:"Round 1 — What is an Audit?",q:"An internal audit must be conducted by someone independent of the area being audited.",ans:true,exp:"ISO 19011 requires auditors not to audit their own work to ensure objectivity and impartiality."},
+  {round:"Round 1 — What is an Audit?",q:"The purpose of an internal audit is to catch people doing things wrong and punish them.",ans:false,exp:"The purpose is to verify conformance and find opportunities for improvement — not to blame individuals."},
+  {round:"Round 1 — What is an Audit?",q:"Audits can only be conducted by external certification bodies.",ans:false,exp:"First-party (internal) audits are conducted by the organisation itself."},
+  {round:"Round 1 — What is an Audit?",q:"An audit checklist is a mandatory requirement — you cannot audit without one.",ans:false,exp:"Checklists are a useful guide but not a mandatory requirement. Auditor judgement always takes precedence."},
+  {round:"Round 2 — Non-Conformances & Findings",q:"A non-conformance and an observation are the same thing.",ans:false,exp:"A non-conformance is a failure to meet a requirement. An observation is a potential concern not yet a non-conformance."},
+  {round:"Round 2 — Non-Conformances & Findings",q:"A corrective action and a correction are the same thing.",ans:false,exp:"A correction fixes the immediate problem. A corrective action eliminates the root cause to prevent recurrence."},
+  {round:"Round 2 — Non-Conformances & Findings",q:"A Major Non-Conformance means the entire management system has failed.",ans:false,exp:"A Major NC means the complete absence or total breakdown of one specific requirement — not the whole system."},
+  {round:"Round 2 — Non-Conformances & Findings",q:"An auditor must always raise a non-conformance if they find one, even if it seems minor.",ans:true,exp:"All non-conformances must be raised and recorded regardless of size — that is the integrity of the audit process."},
+  {round:"Round 2 — Non-Conformances & Findings",q:"An Opportunity for Improvement (OFI) is mandatory for the auditee to act on.",ans:false,exp:"An OFI is a suggestion. The auditee is not obligated to implement it unlike a non-conformance."},
+  {round:"Round 3 — PDCA & ISO Standards",q:"The PDCA cycle ends after the 'Act' phase.",ans:false,exp:"PDCA is a continuous loop — after Act you Plan again. It never truly ends."},
+  {round:"Round 3 — PDCA & ISO Standards",q:"ISO 9001, ISO 14001 and ISO 45001 all share the same High Level Structure (Annex SL).",ans:true,exp:"Annex SL ensures all three standards follow the same clause structure making IMS integration straightforward."},
+  {round:"Round 3 — PDCA & ISO Standards",q:"The word 'shall' in an ISO standard means the requirement is optional.",ans:false,exp:"'Shall' is mandatory. 'Should' is a recommendation. 'May' and 'Can' indicate permission or possibility."},
+  {round:"Round 3 — PDCA & ISO Standards",q:"An organisation can be certified to ISO 9001 and ISO 14001 at the same time.",ans:true,exp:"Organisations can hold multiple certifications simultaneously and can pursue an integrated certification audit."},
+  {round:"Round 3 — PDCA & ISO Standards",q:"Management review is only required once every three years at certification renewal.",ans:false,exp:"Management review must be conducted at planned intervals — typically at least annually as a minimum."},
+  {round:"Round 4 — Oil & Gas Context",q:"A hydrocarbon spill at a well site is an environmental aspect under ISO 14001.",ans:true,exp:"Any activity interacting with the environment — including potential spills — is an environmental aspect to identify and manage."},
+  {round:"Round 4 — Oil & Gas Context",q:"Only the HSE department is responsible for the EMS in an oil and gas company.",ans:false,exp:"The EMS is company-wide. All departments — Finance, HR, Operations, BD, IT — have defined environmental responsibilities."},
+  {round:"Round 4 — Oil & Gas Context",q:"Contractors working on your well site are completely outside your EMS scope.",ans:false,exp:"Contractors under your supervision must comply with your EMS requirements and environmental controls."},
+  {round:"Round 4 — Oil & Gas Context",q:"An internal audit finding of 'no waste disposal records available' would be a non-conformance.",ans:true,exp:"Failure to maintain documented information required by the standard is a clear non-conformance under Clause 7.5."},
+  {round:"Round 4 — Oil & Gas Context",q:"Passing the internal audit guarantees you will pass the external certification audit.",ans:false,exp:"The internal audit prepares you, but the certification body conducts a completely independent assessment."},
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let teams     = [];
+let currentQ  = 0;
+let timerInt  = null;
+let timeLeft  = TIMER;
+let revealed  = false;
+let respListener = null;
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let actx;
+const ac=()=>{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;};
+function playCorrect(){try{const c=ac();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';const t=c.currentTime+i*.1;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.3);});}catch(e){}}
+function playWrong(){try{const c=ac();[180,150,120].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sawtooth';const t=c.currentTime+i*.18;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.start(t);o.stop(t+.25);});}catch(e){}}
+
+// ── Setup ─────────────────────────────────────────────────────────────────────
+window.addTeam = function(){
+  const inp = document.getElementById('teamInp');
+  const name = inp.value.trim();
+  if(!name) return;
+  if(teams.find(t=>t.name.toLowerCase()===name.toLowerCase())){alert('Name taken.');return;}
+  if(teams.length>=6){alert('Max 6 teams.');return;}
+  const idx=teams.length;
+  teams.push({name,color:PALETTE[idx],emoji:EMOJIS[idx],score:0,correct:0});
+  inp.value='';
+  renderTeamsList();
+};
+
+function renderTeamsList(){
+  document.getElementById('teamsList').innerHTML=teams.map((t,i)=>`
+    <div class="team-item" style="border-color:${t.color.bg};background:${t.color.light};color:${t.color.text}">
+      ${t.emoji} ${t.name}
+      <button class="remove-btn" onclick="removeTeam(${i})">✕</button>
+    </div>`).join('');
+}
+window.removeTeam=function(i){teams.splice(i,1);teams.forEach((t,j)=>{t.color=PALETTE[j];t.emoji=EMOJIS[j];});renderTeamsList();};
+
+window.launchGame = async function(){
+  if(teams.length<2){alert('Add at least 2 teams.');return;}
+  // Write game state to Firebase
+  const gameState={
+    status:'waiting',
+    currentQ:0,
+    questionActive:false,
+    revealed:false,
+    teams: Object.fromEntries(teams.map((t,i)=>[`team_${i}`,{name:t.name,emoji:t.emoji,colorBg:t.color.bg,colorLight:t.color.light,colorText:t.color.text,score:0,correct:0}])),
+  };
+  await set(ref(db,'game'),gameState);
+  showScreen('dashScreen');
+  startQuestion();
+};
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ── Question ──────────────────────────────────────────────────────────────────
+async function startQuestion(){
+  if(currentQ>=QUESTIONS.length){endGame();return;}
+  const q=QUESTIONS[currentQ];
+  revealed=false;
+  timeLeft=TIMER;
+
+  document.getElementById('dhBadge').textContent=`Q ${currentQ+1} / ${QUESTIONS.length}`;
+  document.getElementById('qRound').textContent=q.round;
+  document.getElementById('qText').textContent=q.q;
+  document.getElementById('revealFb').className='reveal-feedback';
+  document.getElementById('nextQBtn').classList.remove('show');
+  document.getElementById('ctrlRow').style.display='flex';
+
+  updateTimerUI();
+
+  // Clear previous responses
+  await set(ref(db,'game/responses'),null);
+  // Push question to Firebase
+  await update(ref(db,'game'),{
+    status:'active',
+    currentQ,
+    questionActive:true,
+    revealed:false,
+    questionText:q.q,
+    questionRound:q.round,
+    questionStart:Date.now(),
+  });
+
+  buildRespGrid();
+  listenResponses();
+
+  clearInterval(timerInt);
+  const startTs=Date.now();
+  timerInt=setInterval(()=>{
+    timeLeft=Math.max(0,TIMER-((Date.now()-startTs)/1000));
+    updateTimerUI();
+    if(timeLeft<=0){clearInterval(timerInt);if(!revealed)autoReveal();}
+  },100);
+}
+
+function updateTimerUI(){
+  const pct=timeLeft/TIMER;
+  const fill=document.getElementById('tFill');
+  fill.style.width=(pct*100)+'%';
+  fill.style.background=pct>.5?'linear-gradient(90deg,#00c853,#29b6f6)':pct>.25?'linear-gradient(90deg,#ff6d00,#ffd600)':'linear-gradient(90deg,#f50057,#ff3d00)';
+  document.getElementById('tCountdown').textContent=timeLeft.toFixed(1)+'s';
+}
+
+// ── Responses listener ────────────────────────────────────────────────────────
+function buildRespGrid(){
+  document.getElementById('respGrid').innerHTML=teams.map((t,i)=>`
+    <div class="resp-chip resp-pending" id="rc-${i}" style="border-color:${t.color.bg}20">
+      ${t.emoji} ${t.name} <span id="rc-val-${i}" style="font-family:'JetBrains Mono',monospace;font-size:.78rem">—</span>
+    </div>`).join('');
+}
+
+function listenResponses(){
+  if(respListener) respListener();
+  respListener = onValue(ref(db,'game/responses'), snap=>{
+    if(!snap.exists()) return;
+    const data=snap.val();
+    teams.forEach((t,i)=>{
+      const key=`team_${i}`;
+      const chip=document.getElementById(`rc-${i}`);
+      const val=document.getElementById(`rc-val-${i}`);
+      if(data[key]){
+        const r=data[key];
+        chip.className='resp-chip resp-in';
+        chip.style.borderColor=t.color.bg;
+        val.textContent=`${r.answer?'TRUE':'FALSE'} · ${parseFloat(r.time).toFixed(1)}s`;
+      }
+    });
+    renderLeaderboard();
+  });
+}
+
+// ── Reveal ────────────────────────────────────────────────────────────────────
+window.reveal = async function(correctAns){
+  if(revealed)return;
+  revealed=true;
+  clearInterval(timerInt);
+  document.getElementById('ctrlRow').style.display='none';
+
+  const q=QUESTIONS[currentQ];
+  const isRight=(correctAns===q.ans);
+
+  if(isRight) playCorrect(); else playWrong();
+
+  const fb=document.getElementById('revealFb');
+  document.getElementById('rfIcon').textContent=q.ans?'✅':'❌';
+  document.getElementById('rfText').innerHTML=`<strong>Correct answer: ${q.ans?'TRUE':'FALSE'}</strong>. ${q.exp}`;
+  fb.className='reveal-feedback show '+(isRight?'correct':'wrong');
+
+  // Score teams based on their responses
+  const snap=await get(ref(db,'game/responses'));
+  const responses=snap.exists()?snap.val():{};
+
+  const updates={};
+  teams.forEach((t,i)=>{
+    const key=`team_${i}`;
+    const r=responses[key];
+    if(r && r.answer===q.ans){
+      const elapsed=parseFloat(r.time);
+      const pts=parseFloat(Math.max(MAX_PTS*(1-elapsed/TIMER)+0.5,0.5).toFixed(2));
+      t.score=parseFloat((t.score+pts).toFixed(2));
+      t.correct++;
+      updates[`game/teams/${key}/score`]=t.score;
+      updates[`game/teams/${key}/correct`]=t.correct;
+      // show on resp chip
+      const chip=document.getElementById(`rc-${i}`);
+      const val=document.getElementById(`rc-val-${i}`);
+      if(chip){chip.className='resp-chip resp-correct';chip.style.borderColor='#00c853';}
+      if(val) val.textContent=`✅ +${pts}pts`;
+    } else if(r){
+      const chip=document.getElementById(`rc-${i}`);
+      if(chip){chip.className='resp-chip resp-wrong';chip.style.borderColor='#f50057';}
+    }
+  });
+
+  await update(ref(db,'game'),{revealed:true,correctAnswer:q.ans,...updates});
+
+  renderLeaderboard();
+  document.getElementById('nextQBtn').classList.add('show');
+};
+
+function autoReveal(){
+  // Time's up — reveal correct answer, no points awarded
+  reveal(QUESTIONS[currentQ].ans);
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+function renderLeaderboard(){
+  const sorted=[...teams].map((t,i)=>({...t,idx:i})).sort((a,b)=>b.score-a.score);
+  const maxScore=sorted[0]?.score||1;
+  document.getElementById('lbRows').innerHTML=sorted.map((t,rank)=>`
+    <div class="lb-row ${rank===0?'gold':''}">
+      <span class="lb-rank">${MEDALS[rank]||rank+1}</span>
+      <span class="lb-name" style="color:${t.color.text}">${t.emoji} ${t.name}</span>
+      <span class="lb-correct">${t.correct}✓</span>
+      <span class="lb-answered" id="la-${t.idx}">${teams[t.idx]?'':'—'}</span>
+      <span class="lb-pts">${t.score.toFixed(1)}</span>
+      <div class="lb-bar-wrap">
+        <div class="lb-bar-track">
+          <div class="lb-bar-fill" style="width:${maxScore>0?(t.score/maxScore*100):0}%;background:${t.color.bg}"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+window.nextQ=function(){currentQ++;startQuestion();};
+
+// ── End game ──────────────────────────────────────────────────────────────────
+async function endGame(){
+  await update(ref(db,'game'),{status:'finished'});
+  if(respListener) respListener();
+  showScreen('finalScreen');
+  const sorted=[...teams].sort((a,b)=>b.score-a.score);
+  const w=sorted[0];
+  document.getElementById('winName').textContent=w.emoji+' '+w.name;
+  document.getElementById('winScore').textContent=`${w.score.toFixed(1)} points · ${w.correct} correct`;
+  const places=['🥇','🥈','🥉'];
+  document.getElementById('ftRows').innerHTML=sorted.map((t,i)=>`
+    <div class="ft-row ${i===0?'gold':''}">
+      <span class="ft-place">${places[i]||'#'+(i+1)}</span>
+      <span class="ft-name" style="color:${t.color.text}">${t.emoji} ${t.name}</span>
+      <span class="ft-c">${t.correct}✓</span>
+      <span class="ft-p">${t.score.toFixed(1)}</span>
+    </div>`).join('');
+  fireConfetti();
+}
+
+function fireConfetti(){
+  const w=document.getElementById('confettiWrap');
+  const cols=['#f0a500','#00c8ff','#00e676','#ff3d5a','#b066ff','#ffd600'];
+  for(let i=0;i<140;i++){
+    const el=document.createElement('div');
+    el.style.cssText=`position:absolute;top:-12px;left:${Math.random()*100}%;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation:cf ${2+Math.random()*3}s ${Math.random()*2}s linear forwards;`;
+    w.appendChild(el);setTimeout(()=>el.remove(),6000);
+  }
+}
+const cs=document.createElement('style');
+cs.textContent='@keyframes cf{to{transform:translateY(110vh) rotate(720deg);opacity:0}}';
+document.head.appendChild(cs);
+</script>
+</body>
+</html>

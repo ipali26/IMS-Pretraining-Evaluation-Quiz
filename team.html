@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Myth Busters — Team</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0f4ff;--white:#fff;--navy:#0f2340;--blue:#1565c0;
+  --purple:#7c3aed;--green:#00c853;--red:#f50057;--amber:#ff6d00;
+  --yellow:#ffd600;--pink:#e91e8c;--border:#e0e8f8;--muted:#7a90b0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+
+/* ══ JOIN SCREEN ══ */
+#joinScreen{background:linear-gradient(135deg,#e8f0fe 0%,#fce4ec 50%,#e8f5e9 100%);}
+.join-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,10vw,4rem);letter-spacing:.06em;
+  text-align:center;line-height:1;margin-bottom:6px;
+  background:linear-gradient(135deg,var(--blue),var(--purple),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.join-sub{color:var(--muted);font-size:.88rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:24px;}
+.join-card{background:white;border-radius:24px;box-shadow:0 4px 24px rgba(15,35,64,.1);padding:28px;width:100%;max-width:380px;}
+.join-card h2{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.08em;color:var(--navy);margin-bottom:6px;}
+.join-card p{color:var(--muted);font-size:.85rem;margin-bottom:18px;}
+.field-label{display:block;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin-bottom:5px;}
+.field-sel{width:100%;padding:12px 14px;margin-bottom:16px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.95rem;color:var(--navy);outline:none;background:#f8faff;appearance:none;}
+.field-sel:focus{border-color:var(--blue);}
+.join-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:white;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.3);transition:transform .15s,box-shadow .15s;}
+.join-btn:hover{transform:translateY(-2px);}
+
+/* ══ WAITING ══ */
+#waitScreen{background:linear-gradient(135deg,#e8f0fe 0%,#e8f5e9 100%);gap:16px;text-align:center;}
+.wait-emoji{font-size:4rem;animation:float 2s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.wait-team{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.06em;}
+.wait-msg{color:var(--muted);font-size:.95rem;font-weight:600;}
+.wait-dot-wrap{display:flex;gap:8px;justify-content:center;margin-top:8px;}
+.wait-dot{width:10px;height:10px;border-radius:50%;animation:blink 1.2s infinite;}
+.wait-dot:nth-child(2){animation-delay:.2s;}
+.wait-dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ══ GAME SCREEN ══ */
+#gameScreen{background:var(--bg);justify-content:flex-start;padding:0;}
+.team-header{
+  width:100%;padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--navy);
+}
+.th-team{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;color:var(--yellow);display:flex;align-items:center;gap:6px;}
+.th-score{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;padding:4px 12px;border-radius:16px;color:white;}
+.th-q{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:rgba(255,255,255,.5);}
+
+.game-inner{width:100%;max-width:500px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px;}
+
+.round-chip{
+  display:inline-flex;align-items:center;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:white;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 14px;border-radius:20px;align-self:flex-start;
+}
+
+.q-card{background:white;border-radius:18px;box-shadow:0 4px 20px rgba(15,35,64,.08);padding:22px;position:relative;overflow:hidden;}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--pink));}
+.q-num{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.q-text{font-size:clamp(1rem,4vw,1.25rem);font-weight:800;line-height:1.45;color:var(--navy);}
+
+/* Timer */
+.t-wrap{margin-top:16px;}
+.t-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.t-lbl{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.t-num{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--navy);}
+.t-track{width:100%;height:10px;background:#e8eef8;border-radius:5px;overflow:hidden;}
+.t-fill{height:100%;border-radius:5px;transition:width .1s linear,background .3s;}
+
+/* Answer buttons */
+.ans-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;}
+.ans-btn{
+  padding:clamp(20px,5vw,28px) 12px;border-radius:16px;border:3px solid;
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,6vw,2.2rem);letter-spacing:.06em;
+  cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+.true-btn{background:#e8f5e9;border-color:var(--green);color:#1b5e20;}
+.true-btn:active{background:var(--green);color:white;transform:scale(.96);}
+.false-btn{background:#fce4ec;border-color:var(--red);color:#880e4f;}
+.false-btn:active{background:var(--red);color:white;transform:scale(.96);}
+.ans-btn:disabled{cursor:default;opacity:.6;}
+.ans-btn.selected-correct{background:var(--green)!important;border-color:var(--green)!important;color:white!important;animation:pop .35s cubic-bezier(.34,1.56,.64,1);}
+.ans-btn.selected-wrong{background:#ffebee!important;border-color:#ef9a9a!important;color:#b71c1c!important;}
+.ans-btn.reveal-correct{background:var(--green)!important;border-color:var(--green)!important;color:white!important;}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+/* Feedback */
+.fb-box{border-radius:14px;padding:14px 16px;display:none;align-items:flex-start;gap:10px;font-size:.9rem;font-weight:600;line-height:1.5;}
+.fb-box.show{display:flex;}
+.fb-box.correct{background:#e8f5e9;border:2px solid var(--green);color:#1b5e20;}
+.fb-box.wrong{background:#fce4ec;border:2px solid var(--red);color:#880e4f;}
+.fb-box.timeout{background:#fff8e1;border:2px solid var(--amber);color:#e65100;}
+.fb-box.waiting{background:#f0f4ff;border:2px solid var(--border);color:var(--muted);}
+.fb-icon{font-size:1.4rem;flex-shrink:0;}
+
+/* Points toast */
+.pts-toast{
+  text-align:center;padding:14px;border-radius:14px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));color:white;
+  font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.08em;
+  display:none;animation:pop .4s cubic-bezier(.34,1.56,.64,1);
+}
+.pts-toast.show{display:block;}
+
+/* Score bar */
+.score-bar{background:white;border-radius:14px;padding:14px 16px;box-shadow:0 2px 10px rgba(15,35,64,.06);}
+.score-bar-title{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.score-row:last-child{margin:0;}
+.sr-name{font-size:.85rem;font-weight:700;min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sr-track{flex:1;height:8px;background:#e8eef8;border-radius:4px;overflow:hidden;}
+.sr-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.sr-pts{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:var(--amber);min-width:40px;text-align:right;}
+
+/* ══ FINISHED ══ */
+#doneScreen{background:linear-gradient(135deg,#fffde7,#e8f5e9);gap:12px;text-align:center;}
+.done-emoji{font-size:4rem;margin-bottom:4px;}
+.done-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.08em;color:var(--navy);}
+.done-sub{color:var(--muted);font-size:.95rem;}
+.done-score{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.3rem;color:var(--amber);margin-top:8px;}
+</style>
+</head>
+<body>
+
+<!-- ══ JOIN ══ -->
+<div class="screen active" id="joinScreen">
+  <div class="join-logo">AUDIT<br>MYTH BUSTERS</div>
+  <div class="join-sub">Team Device</div>
+  <div class="join-card">
+    <h2>🎮 Select Your Team</h2>
+    <p>Choose your team name from the list below to join the game.</p>
+    <label class="field-label">Your Team</label>
+    <select class="field-sel" id="teamSel">
+      <option value="" disabled selected>Loading teams…</option>
+    </select>
+    <button class="join-btn" onclick="joinGame()">JOIN GAME →</button>
+  </div>
+</div>
+
+<!-- ══ WAITING ══ -->
+<div class="screen" id="waitScreen">
+  <div class="wait-emoji" id="waitEmoji">🦁</div>
+  <div class="wait-team" id="waitTeamName">Team A</div>
+  <div class="wait-msg">Waiting for game to start…</div>
+  <div class="wait-dot-wrap">
+    <div class="wait-dot" style="background:#1565c0"></div>
+    <div class="wait-dot" style="background:#7c3aed"></div>
+    <div class="wait-dot" style="background:#e91e8c"></div>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen" id="gameScreen">
+  <div class="team-header">
+    <span class="th-team" id="thTeam">🦁 Team A</span>
+    <span class="th-q" id="thQ">Q 1/20</span>
+    <span class="th-score" id="thScore" style="background:#1565c0">0.0 pts</span>
+  </div>
+  <div class="game-inner">
+    <span class="round-chip" id="roundChip">Round 1</span>
+    <div class="q-card">
+      <div class="q-num" id="qNum">Question 1 of 20</div>
+      <div class="q-text" id="qText">Loading…</div>
+      <div class="t-wrap">
+        <div class="t-row">
+          <span class="t-lbl">Time</span>
+          <span class="t-num" id="tNum">10.0s</span>
+        </div>
+        <div class="t-track"><div class="t-fill" id="tFill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="ans-row">
+      <button class="ans-btn true-btn"  id="trueBtn"  onclick="answer(true)">✅ TRUE</button>
+      <button class="ans-btn false-btn" id="falseBtn" onclick="answer(false)">❌ FALSE</button>
+    </div>
+    <div class="fb-box" id="fbBox"><span class="fb-icon" id="fbIcon"></span><span id="fbText"></span></div>
+    <div class="pts-toast" id="ptsToast"></div>
+    <div class="score-bar">
+      <div class="score-bar-title">🏆 Live Scores</div>
+      <div id="scoreRows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DONE ══ -->
+<div class="screen" id="doneScreen">
+  <div class="done-emoji">🎉</div>
+  <div class="done-title">Game Over!</div>
+  <div class="done-sub" id="doneTeamName">Team A</div>
+  <div class="done-score" id="doneFinalScore">0.0 pts</div>
+</div>
+
+<script type="module">
+import { initializeApp }     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, set, update, onValue }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyB1k3crQUim9Wqxg93w-FSnCdL98uv9VUg",
+  authDomain:"ims-mythbusters.firebaseapp.com",
+  databaseURL:"https://ims-mythbusters-default-rtdb.firebaseio.com",
+  projectId:"ims-mythbusters",
+  storageBucket:"ims-mythbusters.firebasestorage.app",
+  messagingSenderId:"747989755844",
+  appId:"1:747989755844:web:100a50f74a216daeafa691"
+};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let myTeamKey='';
+let myTeam=null;
+let myScore=0;
+let myCorrect=0;
+let currentQ=0;
+let answered=false;
+let timerInt=null;
+let timeLeft=10;
+let qStartTime=0;
+let gameListener=null;
+let lastQ=-1;
+
+const TIMER=10;
+const MAX_PTS=5;
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let actx;
+const ac=()=>{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;};
+function playCorrect(){try{const c=ac();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';const t=c.currentTime+i*.1;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.3);});}catch(e){}}
+function playWrong(){try{const c=ac();[180,150,120].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sawtooth';const t=c.currentTime+i*.18;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.start(t);o.stop(t+.25);});}catch(e){}}
+
+// ── Load teams from Firebase ──────────────────────────────────────────────────
+async function loadTeams(){
+  const snap=await get(ref(db,'game/teams'));
+  if(!snap.exists()){
+    document.getElementById('teamSel').innerHTML='<option value="" disabled selected>No game found — ask facilitator to launch</option>';
+    return;
+  }
+  const teams=snap.val();
+  const sel=document.getElementById('teamSel');
+  sel.innerHTML='<option value="" disabled selected>Select your team…</option>';
+  Object.entries(teams).forEach(([key,t])=>{
+    const opt=document.createElement('option');
+    opt.value=key;opt.textContent=t.emoji+' '+t.name;
+    sel.appendChild(opt);
+  });
+}
+loadTeams();
+
+// ── Join ──────────────────────────────────────────────────────────────────────
+window.joinGame=async function(){
+  const sel=document.getElementById('teamSel');
+  myTeamKey=sel.value;
+  if(!myTeamKey){alert('Please select your team.');return;}
+  const snap=await get(ref(db,`game/teams/${myTeamKey}`));
+  myTeam=snap.val();
+  document.getElementById('waitEmoji').textContent=myTeam.emoji;
+  document.getElementById('waitTeamName').textContent=myTeam.name;
+  document.getElementById('waitTeamName').style.color=myTeam.colorText;
+  showScreen('waitScreen');
+  listenGame();
+};
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ── Listen to game state ──────────────────────────────────────────────────────
+function listenGame(){
+  gameListener=onValue(ref(db,'game'),snap=>{
+    if(!snap.exists())return;
+    const g=snap.val();
+
+    if(g.status==='finished'){showScreen('doneScreen');renderDone();return;}
+    if(g.status==='waiting'){showScreen('waitScreen');return;}
+    if(g.status==='active'){
+      showScreen('gameScreen');
+      updateHeader(g);
+
+      // New question?
+      if(g.currentQ!==lastQ){
+        lastQ=g.currentQ;
+        currentQ=g.currentQ;
+        answered=false;
+        loadQuestion(g);
+      }
+
+      // Revealed?
+      if(g.revealed){
+        onReveal(g);
+      }
+
+      // Update live scores
+      renderScoreBar(g.teams);
+
+      // Update my score from Firebase
+      if(g.teams && g.teams[myTeamKey]){
+        myScore=g.teams[myTeamKey].score||0;
+        myCorrect=g.teams[myTeamKey].correct||0;
+        document.getElementById('thScore').textContent=parseFloat(myScore).toFixed(1)+' pts';
+      }
+    }
+  });
+}
+
+function updateHeader(g){
+  document.getElementById('thTeam').textContent=myTeam.emoji+' '+myTeam.name;
+  document.getElementById('thQ').textContent=`Q ${g.currentQ+1}/20`;
+  document.getElementById('thScore').style.background=myTeam.colorBg;
+}
+
+function loadQuestion(g){
+  clearInterval(timerInt);
+  document.getElementById('roundChip').textContent='● '+g.questionRound;
+  document.getElementById('qNum').textContent=`Question ${g.currentQ+1} of 20`;
+  document.getElementById('qText').textContent=g.questionText;
+  document.getElementById('trueBtn').disabled=false;
+  document.getElementById('falseBtn').disabled=false;
+  document.getElementById('trueBtn').className='ans-btn true-btn';
+  document.getElementById('falseBtn').className='ans-btn false-btn';
+  document.getElementById('fbBox').className='fb-box';
+  document.getElementById('ptsToast').className='pts-toast';
+  timeLeft=TIMER;
+  updateTimerUI();
+  qStartTime=g.questionStart||Date.now();
+  timerInt=setInterval(()=>{
+    timeLeft=Math.max(0,TIMER-((Date.now()-qStartTime)/1000));
+    updateTimerUI();
+    if(timeLeft<=0){clearInterval(timerInt);if(!answered)timeOut();}
+  },100);
+}
+
+function updateTimerUI(){
+  const pct=timeLeft/TIMER;
+  const fill=document.getElementById('tFill');
+  fill.style.width=(pct*100)+'%';
+  fill.style.background=pct>.5?'linear-gradient(90deg,#00c853,#29b6f6)':pct>.25?'linear-gradient(90deg,#ff6d00,#ffd600)':'linear-gradient(90deg,#f50057,#ff3d00)';
+  document.getElementById('tNum').textContent=timeLeft.toFixed(1)+'s';
+}
+
+// ── Answer ────────────────────────────────────────────────────────────────────
+window.answer=async function(choice){
+  if(answered)return;
+  answered=true;
+  clearInterval(timerInt);
+  const elapsed=Math.min((Date.now()-qStartTime)/1000,TIMER);
+
+  document.getElementById('trueBtn').disabled=true;
+  document.getElementById('falseBtn').disabled=true;
+
+  // Highlight selected
+  const btn=document.getElementById(choice?'trueBtn':'falseBtn');
+  btn.classList.add('selected-correct'); // tentative — will update on reveal
+
+  // Write to Firebase
+  await set(ref(db,`game/responses/${myTeamKey}`),{
+    answer:choice,
+    time:elapsed.toFixed(2),
+    teamName:myTeam.name,
+  });
+
+  // Show waiting feedback
+  const fb=document.getElementById('fbBox');
+  document.getElementById('fbIcon').textContent='⏳';
+  document.getElementById('fbText').textContent='Answer submitted! Waiting for facilitator to reveal…';
+  fb.className='fb-box show waiting';
+};
+
+function timeOut(){
+  if(answered)return;
+  answered=true;
+  document.getElementById('trueBtn').disabled=true;
+  document.getElementById('falseBtn').disabled=true;
+  const fb=document.getElementById('fbBox');
+  document.getElementById('fbIcon').textContent='⏱️';
+  document.getElementById('fbText').textContent="Time's up! You didn't answer in time.";
+  fb.className='fb-box show timeout';
+  playWrong();
+}
+
+// ── Reveal ────────────────────────────────────────────────────────────────────
+function onReveal(g){
+  clearInterval(timerInt);
+  document.getElementById('trueBtn').disabled=true;
+  document.getElementById('falseBtn').disabled=true;
+  const correctAns=g.correctAnswer;
+
+  // Mark correct button
+  document.getElementById('trueBtn').className ='ans-btn true-btn' +(correctAns===true?' reveal-correct':'');
+  document.getElementById('falseBtn').className='ans-btn false-btn'+(correctAns===false?' reveal-correct':'');
+
+  // Did this team answer?
+  const myResp=g.responses&&g.responses[myTeamKey];
+  if(!myResp) return;
+
+  const isCorrect=(myResp.answer===correctAns);
+  const elapsed=parseFloat(myResp.time);
+  const pts=isCorrect?parseFloat(Math.max(MAX_PTS*(1-elapsed/TIMER)+0.5,0.5).toFixed(2)):0;
+
+  if(isCorrect){
+    playCorrect();
+    const trueBtn=document.getElementById('trueBtn');
+    const falseBtn=document.getElementById('falseBtn');
+    if(myResp.answer) trueBtn.className='ans-btn selected-correct';
+    else falseBtn.className='ans-btn selected-correct';
+    document.getElementById('fbIcon').textContent='✅';
+    document.getElementById('fbText').innerHTML=`<strong>Correct!</strong> You answered in ${elapsed.toFixed(1)}s. <strong>+${pts.toFixed(2)} pts!</strong>`;
+    document.getElementById('fbBox').className='fb-box show correct';
+    const toast=document.getElementById('ptsToast');
+    toast.textContent=`+${pts.toFixed(2)} pts`;
+    toast.className='pts-toast show';
+  } else {
+    playWrong();
+    if(myResp.answer) document.getElementById('trueBtn').className='ans-btn selected-wrong';
+    else document.getElementById('falseBtn').className='ans-btn selected-wrong';
+    document.getElementById('fbIcon').textContent='❌';
+    document.getElementById('fbText').innerHTML=`<strong>Wrong!</strong> Correct answer was <strong>${correctAns?'TRUE':'FALSE'}</strong>.`;
+    document.getElementById('fbBox').className='fb-box show wrong';
+  }
+}
+
+// ── Live score bar ─────────────────────────────────────────────────────────────
+function renderScoreBar(teamsData){
+  if(!teamsData) return;
+  const arr=Object.values(teamsData).sort((a,b)=>(b.score||0)-(a.score||0));
+  const max=arr[0]?.score||1;
+  document.getElementById('scoreRows').innerHTML=arr.map(t=>`
+    <div class="score-row">
+      <span class="sr-name" style="color:${t.colorText}">${t.emoji} ${t.name}</span>
+      <div class="sr-track"><div class="sr-fill" style="width:${max>0?((t.score||0)/max*100):0}%;background:${t.colorBg}"></div></div>
+      <span class="sr-pts">${parseFloat(t.score||0).toFixed(1)}</span>
+    </div>`).join('');
+}
+
+function renderDone(){
+  document.getElementById('doneTeamName').textContent=myTeam.emoji+' '+myTeam.name;
+  document.getElementById('doneFinalScore').textContent=parseFloat(myScore).toFixed(1)+' pts · '+myCorrect+' correct';
+}
+</script>
+</body>
+</html>
