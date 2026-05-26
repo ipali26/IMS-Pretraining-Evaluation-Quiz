@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Environmental Hotseat — Team</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0fff4;--white:#fff;--navy:#0a2418;--green:#00897b;--lime:#69f0ae;
+  --teal:#00bcd4;--amber:#ff8f00;--red:#e53935;--yellow:#ffd600;--border:#c8e6c0;--muted:#5a7a6a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+
+/* ══ JOIN ══ */
+#joinScreen{background:linear-gradient(135deg,#e0f2f1 0%,#f1f8e9 100%);}
+.j-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,9vw,3.8rem);letter-spacing:.06em;text-align:center;line-height:1;margin-bottom:6px;background:linear-gradient(135deg,var(--green),var(--teal),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.j-sub{color:var(--muted);font-size:.85rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:22px;}
+.j-card{background:white;border-radius:22px;box-shadow:0 4px 24px rgba(10,36,24,.1);padding:26px;width:100%;max-width:360px;}
+.j-card h2{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--navy);margin-bottom:6px;}
+.j-card p{color:var(--muted);font-size:.84rem;margin-bottom:16px;}
+.f-lbl{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin-bottom:5px;}
+.f-sel{width:100%;padding:12px 14px;margin-bottom:14px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.93rem;outline:none;background:#f0fff4;appearance:none;}
+.f-sel:focus{border-color:var(--green);}
+.j-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--green),var(--teal));border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;color:white;cursor:pointer;box-shadow:0 4px 14px rgba(0,137,123,.3);transition:transform .15s;}
+.j-btn:hover{transform:translateY(-2px);}
+
+/* ══ WAITING ══ */
+#waitScreen{background:linear-gradient(135deg,#e0f2f1 0%,#e8f5e9 100%);gap:14px;text-align:center;}
+.w-emoji{font-size:4rem;animation:float 2s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.w-team{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:.06em;}
+.w-msg{color:var(--muted);font-size:.92rem;font-weight:600;}
+.w-dots{display:flex;gap:8px;justify-content:center;margin-top:6px;}
+.w-dot{width:10px;height:10px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite;}
+.w-dot:nth-child(2){animation-delay:.2s;}
+.w-dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ══ GAME ══ */
+#gameScreen{background:var(--bg);justify-content:flex-start;padding:0;}
+.g-hdr{width:100%;padding:11px 16px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;}
+.gh-team{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.08em;color:var(--lime);display:flex;align-items:center;gap:5px;}
+.gh-q{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.5);}
+.gh-score{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;padding:4px 10px;border-radius:14px;color:white;}
+
+.g-inner{width:100%;max-width:500px;margin:0 auto;padding:18px 14px 40px;display:flex;flex-direction:column;gap:14px;}
+.cat-chip{display:inline-flex;align-items:center;background:linear-gradient(135deg,var(--green),var(--teal));color:white;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:20px;align-self:flex-start;}
+.type-chip{display:inline-flex;align-items:center;background:#e0f2f1;color:var(--green);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:12px;margin-left:6px;}
+
+.q-card{background:white;border-radius:16px;box-shadow:0 4px 18px rgba(10,36,24,.08);padding:20px;position:relative;overflow:hidden;}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--green),var(--teal),var(--lime));}
+.q-num{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.q-text{font-size:clamp(.95rem,3.5vw,1.15rem);font-weight:800;line-height:1.45;color:var(--navy);}
+
+.t-wrap{margin-top:14px;}
+.t-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.t-lbl{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.t-num{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--navy);}
+.t-track{width:100%;height:9px;background:#e0f2e0;border-radius:5px;overflow:hidden;}
+.t-fill{height:100%;border-radius:5px;transition:width .1s linear,background .3s;}
+
+/* MCQ options */
+.opts-grid{display:flex;flex-direction:column;gap:10px;}
+.opt-btn{
+  padding:14px 14px;border-radius:12px;border:2px solid var(--border);
+  background:#f0fff4;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;
+  display:flex;align-items:flex-start;gap:10px;text-align:left;cursor:pointer;
+  transition:all .18s;-webkit-tap-highlight-color:transparent;user-select:none;width:100%;
+}
+.opt-btn:active{transform:scale(.97);}
+.opt-btn:hover:not(:disabled){border-color:var(--green);background:#e0f2f1;}
+.opt-ltr{width:28px;height:28px;border-radius:50%;background:var(--green);color:white;font-family:'Bebas Neue',sans-serif;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.opt-btn:disabled{cursor:default;opacity:.7;}
+.opt-btn.selected{border-color:var(--teal);background:#e0f2f1;}
+.opt-btn.selected .opt-ltr{background:var(--teal);}
+.opt-btn.reveal-correct{background:#e8f5e9!important;border-color:var(--green)!important;animation:pop .35s cubic-bezier(.34,1.56,.64,1);}
+.opt-btn.reveal-correct .opt-ltr{background:var(--green)!important;}
+.opt-btn.reveal-wrong{background:#ffebee!important;border-color:#ef9a9a!important;opacity:.6!important;}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+/* feedback */
+.fb{border-radius:12px;padding:12px 14px;display:none;align-items:flex-start;gap:8px;font-size:.88rem;font-weight:600;line-height:1.45;}
+.fb.show{display:flex;}
+.fb.correct{background:#e8f5e9;border:2px solid var(--green);color:#1b5e20;}
+.fb.wrong{background:#fce4ec;border:2px solid var(--red);color:#880e4f;}
+.fb.timeout{background:#fff8e1;border:2px solid var(--amber);color:#7a4000;}
+.fb.waiting{background:#f0fff4;border:2px solid var(--border);color:var(--muted);}
+.fb-icon{font-size:1.3rem;flex-shrink:0;}
+
+/* bonus toast */
+.bonus{text-align:center;padding:12px;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--teal));color:white;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.08em;display:none;animation:pop .4s cubic-bezier(.34,1.56,.64,1);}
+.bonus.show{display:block;}
+
+/* score bar */
+.s-bar{background:white;border-radius:12px;padding:12px 14px;box-shadow:0 2px 10px rgba(10,36,24,.06);}
+.sb-title{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.sr{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.sr:last-child{margin:0;}
+.sr-name{font-size:.82rem;font-weight:700;min-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sr-track{flex:1;height:7px;background:#e0f2e0;border-radius:4px;overflow:hidden;}
+.sr-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.sr-pts{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--amber);min-width:36px;text-align:right;}
+
+/* ══ DONE ══ */
+#doneScreen{background:linear-gradient(135deg,#f1f8e9,#e0f7fa);gap:10px;text-align:center;}
+.done-e{font-size:4rem;margin-bottom:4px;}
+.done-t{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.08em;color:var(--navy);}
+.done-s{color:var(--muted);font-size:.9rem;}
+.done-p{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.2rem;color:var(--amber);margin-top:6px;}
+</style>
+</head>
+<body>
+
+<!-- ══ JOIN ══ -->
+<div class="screen active" id="joinScreen">
+  <div class="j-logo">ENVIRONMENTAL<br>HOTSEAT</div>
+  <div class="j-sub">Team Device · Day 2 Icebreaker</div>
+  <div class="j-card">
+    <h2>🌿 Select Your Team</h2>
+    <p>Choose your team name to join the game.</p>
+    <label class="f-lbl">Your Team</label>
+    <select class="f-sel" id="teamSel"><option value="" disabled selected>Loading…</option></select>
+    <button class="j-btn" onclick="joinGame()">JOIN HOTSEAT 🔥</button>
+  </div>
+</div>
+
+<!-- ══ WAITING ══ -->
+<div class="screen" id="waitScreen">
+  <div class="w-emoji" id="wEmoji">🦁</div>
+  <div class="w-team" id="wTeam">Team A</div>
+  <div class="w-msg">Waiting for game to start…</div>
+  <div class="w-dots"><div class="w-dot"></div><div class="w-dot"></div><div class="w-dot"></div></div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen" id="gameScreen">
+  <div class="g-hdr">
+    <span class="gh-team" id="ghTeam">🦁 Team A</span>
+    <span class="gh-q" id="ghQ">Q 1/20</span>
+    <span class="gh-score" id="ghScore" style="background:var(--green)">0 pts</span>
+  </div>
+  <div class="g-inner">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+      <span class="cat-chip" id="catChip">Category</span>
+      <span class="type-chip" id="typeChip">Type</span>
+    </div>
+    <div class="q-card">
+      <div class="q-num" id="qNum">Question 1 of 20</div>
+      <div class="q-text" id="qText">Loading…</div>
+      <div class="t-wrap">
+        <div class="t-row"><span class="t-lbl">Time</span><span class="t-num" id="tNum">15.0s</span></div>
+        <div class="t-track"><div class="t-fill" id="tFill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="opts-grid" id="optsGrid"></div>
+    <div class="fb" id="fbBox"><span class="fb-icon" id="fbIcon"></span><span id="fbText"></span></div>
+    <div class="bonus" id="bonusToast"></div>
+    <div class="s-bar">
+      <div class="sb-title">🏆 Live Scores</div>
+      <div id="scoreRows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DONE ══ -->
+<div class="screen" id="doneScreen">
+  <div class="done-e">🎉</div>
+  <div class="done-t">Hotseat Complete!</div>
+  <div class="done-s" id="doneTeam">Team A</div>
+  <div class="done-p" id="doneScore">0 pts</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, set, onValue }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyB1k3crQUim9Wqxg93w-FSnCdL98uv9VUg",authDomain:"ims-mythbusters.firebaseapp.com",databaseURL:"https://ims-mythbusters-default-rtdb.firebaseio.com",projectId:"ims-mythbusters",storageBucket:"ims-mythbusters.firebasestorage.app",messagingSenderId:"747989755844",appId:"1:747989755844:web:100a50f74a216daeafa691"};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const TIMER=15;
+const BONUS=[5,3,1];
+
+let myTeamKey='';
+let myTeam=null;
+let myScore=0;
+let myCorrect=0;
+let lastQ=-1;
+let answered=false;
+let timerInt=null;
+let timeLeft=TIMER;
+let qStartTime=0;
+let gameListener=null;
+
+let actx;
+const ac=()=>{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;};
+function playCorrect(){try{const c=ac();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';const t=c.currentTime+i*.1;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.3);});}catch(e){}}
+function playWrong(){try{const c=ac();[180,150,120].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sawtooth';const t=c.currentTime+i*.18;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.start(t);o.stop(t+.25);});}catch(e){}}
+
+async function loadTeams(){
+  const snap=await get(ref(db,'hotseat/teams'));
+  if(!snap.exists()){document.getElementById('teamSel').innerHTML='<option value="" disabled selected>No game found — ask facilitator to launch</option>';return;}
+  const teams=snap.val();
+  const sel=document.getElementById('teamSel');
+  sel.innerHTML='<option value="" disabled selected>Select your team…</option>';
+  Object.entries(teams).forEach(([key,t])=>{
+    const opt=document.createElement('option');
+    opt.value=key;opt.textContent=t.emoji+' '+t.name;sel.appendChild(opt);
+  });
+}
+loadTeams();
+
+window.joinGame=async function(){
+  const sel=document.getElementById('teamSel');
+  myTeamKey=sel.value;
+  if(!myTeamKey){alert('Please select your team.');return;}
+  const snap=await get(ref(db,`hotseat/teams/${myTeamKey}`));
+  myTeam=snap.val();
+  document.getElementById('wEmoji').textContent=myTeam.emoji;
+  document.getElementById('wTeam').textContent=myTeam.name;
+  document.getElementById('wTeam').style.color=myTeam.colorText;
+  showScreen('waitScreen');
+  listenGame();
+};
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function listenGame(){
+  gameListener=onValue(ref(db,'hotseat'),snap=>{
+    if(!snap.exists())return;
+    const g=snap.val();
+    if(g.status==='finished'){showScreen('doneScreen');renderDone();return;}
+    if(g.status!=='active')return;
+    showScreen('gameScreen');
+    updateHeader(g);
+    if(g.currentQ!==lastQ){
+      lastQ=g.currentQ;answered=false;
+      loadQuestion(g);
+    }
+    if(g.revealed) onReveal(g);
+    if(g.teams) renderScoreBar(g.teams);
+    if(g.teams&&g.teams[myTeamKey]){
+      myScore=g.teams[myTeamKey].score||0;
+      myCorrect=g.teams[myTeamKey].correct||0;
+      document.getElementById('ghScore').textContent=myScore+' pts';
+    }
+  });
+}
+
+function updateHeader(g){
+  document.getElementById('ghTeam').textContent=myTeam.emoji+' '+myTeam.name;
+  document.getElementById('ghQ').textContent=`Q ${g.currentQ+1}/20`;
+  document.getElementById('ghScore').style.background=myTeam.colorBg;
+}
+
+function loadQuestion(g){
+  clearInterval(timerInt);
+  document.getElementById('catChip').textContent=g.questionCat||'';
+  document.getElementById('typeChip').textContent='🎯 '+(g.questionType||'');
+  document.getElementById('qNum').textContent=`Question ${g.currentQ+1} of 20`;
+  document.getElementById('qText').textContent=g.questionText||'';
+  document.getElementById('fbBox').className='fb';
+  document.getElementById('bonusToast').className='bonus';
+  buildOpts(g.questionOpts,null);
+  timeLeft=TIMER;
+  updateTimerUI();
+  qStartTime=g.questionStart||Date.now();
+  timerInt=setInterval(()=>{
+    timeLeft=Math.max(0,TIMER-((Date.now()-qStartTime)/1000));
+    updateTimerUI();
+    if(timeLeft<=0){clearInterval(timerInt);if(!answered)timeOut();}
+  },100);
+}
+
+function buildOpts(opts,correctAns){
+  if(!opts)return;
+  const letters=['A','B','C','D'];
+  document.getElementById('optsGrid').innerHTML=Object.entries(opts).map(([k,v])=>`
+    <button class="opt-btn ${correctAns?(k===correctAns?'reveal-correct':'reveal-wrong'):''}" id="ob-${k}" onclick="pickAnswer('${k}')" ${correctAns?'disabled':''}>
+      <span class="opt-ltr">${k}</span><span>${v}</span>
+    </button>`).join('');
+}
+
+function updateTimerUI(){
+  const pct=timeLeft/TIMER;
+  const fill=document.getElementById('tFill');
+  fill.style.width=(pct*100)+'%';
+  fill.style.background=pct>.6?'linear-gradient(90deg,#00c853,#00bcd4)':pct>.3?'linear-gradient(90deg,#ff8f00,#ffd600)':'linear-gradient(90deg,#e53935,#ff5722)';
+  document.getElementById('tNum').textContent=timeLeft.toFixed(1)+'s';
+}
+
+window.pickAnswer=async function(choice){
+  if(answered)return;
+  answered=true;
+  clearInterval(timerInt);
+  const elapsed=Math.min((Date.now()-qStartTime)/1000,TIMER);
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  document.getElementById(`ob-${choice}`).classList.add('selected');
+  await set(ref(db,`hotseat/responses/${myTeamKey}`),{answer:choice,time:elapsed.toFixed(2),teamName:myTeam.name});
+  const fb=document.getElementById('fbBox');
+  document.getElementById('fbIcon').textContent='⏳';
+  document.getElementById('fbText').textContent='Answer submitted! Waiting for facilitator to reveal…';
+  fb.className='fb show waiting';
+};
+
+function timeOut(){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('fbBox');
+  document.getElementById('fbIcon').textContent='⏱️';
+  document.getElementById('fbText').textContent="Time's up! You didn't answer in time.";
+  fb.className='fb show timeout';
+  playWrong();
+}
+
+function onReveal(g){
+  clearInterval(timerInt);
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  const correctAns=g.correctAnswer;
+  if(g.questionOpts) buildOpts(g.questionOpts,correctAns);
+  const myResp=g.responses&&g.responses[myTeamKey];
+  if(!myResp)return;
+  const isCorrect=(myResp.answer===correctAns);
+  const elapsed=parseFloat(myResp.time);
+
+  // Determine my rank among correct answers
+  let myRank=-1;
+  if(isCorrect && g.responses){
+    const correctOthers=Object.entries(g.responses)
+      .filter(([k,r])=>r.answer===correctAns)
+      .sort((a,b)=>parseFloat(a[1].time)-parseFloat(b[1].time));
+    myRank=correctOthers.findIndex(([k])=>k===myTeamKey);
+  }
+  const pts=isCorrect&&myRank>=0?(BONUS[myRank]||0):0;
+
+  if(isCorrect){
+    playCorrect();
+    const fb=document.getElementById('fbBox');
+    document.getElementById('fbIcon').textContent='✅';
+    document.getElementById('fbText').innerHTML=pts>0
+      ?`<strong>Correct!</strong> You were ${myRank===0?'1st 🥇':myRank===1?'2nd 🥈':'3rd 🥉'} in ${elapsed.toFixed(1)}s. <strong>+${pts} pts!</strong>`
+      :`<strong>Correct!</strong> Answered in ${elapsed.toFixed(1)}s. No bonus points this round.`;
+    fb.className='fb show correct';
+    if(pts>0){
+      const toast=document.getElementById('bonusToast');
+      toast.textContent=`+${pts} pts ${myRank===0?'🥇':myRank===1?'🥈':'🥉'}`;
+      toast.className='bonus show';
+    }
+  } else {
+    playWrong();
+    const fb=document.getElementById('fbBox');
+    document.getElementById('fbIcon').textContent='❌';
+    document.getElementById('fbText').innerHTML=`<strong>Wrong!</strong> Correct answer was <strong>${correctAns}</strong>.`;
+    fb.className='fb show wrong';
+  }
+}
+
+function renderScoreBar(teamsData){
+  if(!teamsData)return;
+  const arr=Object.values(teamsData).sort((a,b)=>(b.score||0)-(a.score||0));
+  const max=arr[0]?.score||1;
+  document.getElementById('scoreRows').innerHTML=arr.map(t=>`
+    <div class="sr">
+      <span class="sr-name" style="color:${t.colorText}">${t.emoji} ${t.name}</span>
+      <div class="sr-track"><div class="sr-fill" style="width:${max>0?((t.score||0)/max*100):0}%;background:${t.colorBg}"></div></div>
+      <span class="sr-pts">${t.score||0}</span>
+    </div>`).join('');
+}
+
+function renderDone(){
+  document.getElementById('doneTeam').textContent=myTeam.emoji+' '+myTeam.name;
+  document.getElementById('doneScore').textContent=myScore+' pts · '+myCorrect+' correct';
+}
+</script>
+</body>
+</html>

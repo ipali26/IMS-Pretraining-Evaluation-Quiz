@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Environmental Hotseat — Facilitator</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f0fff4;--white:#fff;--navy:#0a2418;--green:#00897b;--lime:#69f0ae;
+  --teal:#00bcd4;--amber:#ff8f00;--red:#e53935;--yellow:#ffd600;
+  --purple:#6a1b9a;--border:#c8e6c0;--muted:#5a7a6a;--text:#0a2418;
+  --shadow:0 4px 24px rgba(10,36,24,.10);--radius:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+
+/* ══ SETUP ══ */
+#setupScreen{background:linear-gradient(135deg,#e0f2f1 0%,#f1f8e9 50%,#e8f5e9 100%);}
+.s-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,7vw,4.2rem);letter-spacing:.06em;text-align:center;line-height:1;margin-bottom:6px;background:linear-gradient(135deg,var(--green),var(--teal),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.s-sub{color:var(--muted);font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:24px;}
+.s-card{background:white;border-radius:24px;box-shadow:var(--shadow);padding:28px;width:100%;max-width:440px;}
+.s-card h2{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.08em;color:var(--navy);margin-bottom:6px;}
+.s-card p{color:var(--muted);font-size:.84rem;margin-bottom:18px;line-height:1.5;}
+.f-label{display:block;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin-bottom:5px;}
+.f-inp{width:100%;padding:12px 14px;margin-bottom:14px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;background:#f0fff4;}
+.f-inp:focus{border-color:var(--green);}
+.teams-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.team-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px solid;font-weight:700;font-size:.9rem;}
+.rm-btn{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1rem;opacity:.5;}
+.rm-btn:hover{opacity:1;}
+.launch-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--teal));border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:white;cursor:pointer;box-shadow:0 4px 16px rgba(0,137,123,.35);transition:transform .15s,box-shadow .15s;}
+.launch-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,137,123,.45);}
+
+/* ══ DASHBOARD ══ */
+#dashScreen{background:var(--bg);justify-content:flex-start;padding:0;}
+.d-hdr{width:100%;background:var(--navy);padding:11px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.dh-title{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.1em;color:var(--lime);}
+.dh-badge{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);padding:4px 12px;border-radius:20px;}
+.dh-live{font-size:.78rem;color:var(--lime);font-weight:700;display:flex;align-items:center;gap:5px;}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--lime);animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+
+.d-body{width:100%;max-width:980px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px;}
+
+/* scenario card */
+.sc-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;position:relative;overflow:hidden;}
+.sc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--green),var(--teal),var(--lime));}
+.sc-round{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.sc-type{display:inline-flex;align-items:center;gap:5px;background:#e0f2f1;color:var(--green);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:12px;margin-bottom:10px;}
+.sc-text{font-size:clamp(1rem,2.5vw,1.25rem);font-weight:800;line-height:1.45;color:var(--navy);margin-bottom:20px;}
+.sc-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.sc-opt{padding:12px 14px;border-radius:12px;border:2px solid var(--border);background:#f0fff4;font-size:.9rem;font-weight:700;display:flex;align-items:flex-start;gap:8px;text-align:left;}
+.sc-opt-ltr{width:26px;height:26px;border-radius:50%;background:var(--green);color:white;font-family:'Bebas Neue',sans-serif;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sc-opt.reveal-correct{background:#e8f5e9;border-color:var(--green);}
+.sc-opt.reveal-correct .sc-opt-ltr{background:var(--green);}
+.sc-opt.reveal-wrong{background:#ffebee;border-color:#ef9a9a;opacity:.6;}
+
+/* timer */
+.t-wrap{margin-bottom:16px;}
+.t-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.t-lbl{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.t-num{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--navy);}
+.t-track{width:100%;height:12px;background:#e0f2e0;border-radius:6px;overflow:hidden;}
+.t-fill{height:100%;border-radius:6px;transition:width .1s linear,background .3s;}
+
+/* controls */
+.ctrl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.rev-btn{padding:11px 8px;border-radius:10px;border:2px solid;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.06em;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.rev-btn:hover:not(:disabled){transform:translateY(-2px);}
+.rev-A{background:#e3f2fd;border-color:#1565c0;color:#1565c0;}
+.rev-A:hover:not(:disabled){background:#1565c0;color:white;}
+.rev-B{background:#f3e5f5;border-color:#6a1b9a;color:#6a1b9a;}
+.rev-B:hover:not(:disabled){background:#6a1b9a;color:white;}
+.rev-C{background:#fff8e1;border-color:#ff8f00;color:#ff8f00;}
+.rev-C:hover:not(:disabled){background:#ff8f00;color:white;}
+.rev-D{background:#fce4ec;border-color:#c62828;color:#c62828;}
+.rev-D:hover:not(:disabled){background:#c62828;color:white;}
+.rev-btn:disabled{cursor:default;opacity:.4;}
+
+.nxt-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--green),var(--teal));border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;color:white;cursor:pointer;box-shadow:0 4px 14px rgba(0,137,123,.3);transition:transform .15s;display:none;}
+.nxt-btn.show{display:block;}
+.nxt-btn:hover{transform:translateY(-2px);}
+
+/* clause spotlight */
+.spotlight{border-radius:14px;padding:14px 16px;display:none;align-items:flex-start;gap:10px;font-size:.9rem;line-height:1.5;margin-top:8px;}
+.spotlight.show{display:flex;}
+.spotlight.correct{background:#e8f5e9;border:2px solid var(--green);color:#1b5e20;}
+.spotlight.wrong{background:#fff3e0;border:2px solid var(--amber);color:#7a4000;}
+.sp-icon{font-size:1.4rem;flex-shrink:0;}
+
+/* responses */
+.resp-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;}
+.resp-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:var(--navy);margin-bottom:10px;}
+.resp-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.r-chip{padding:7px 14px;border-radius:20px;font-weight:700;font-size:.82rem;border:2px solid;display:flex;align-items:center;gap:5px;transition:all .3s;}
+.r-pending{background:#f0fff4;border-color:#c8e6c0;color:var(--muted);}
+.r-in{background:#fff8e1;border-color:var(--amber);color:#7a4000;animation:popIn .3s cubic-bezier(.34,1.56,.64,1);}
+.r-correct{background:#e8f5e9;border-color:var(--green);color:#1b5e20;}
+.r-wrong{background:#ffebee;border-color:#ef9a9a;color:#b71c1c;}
+@keyframes popIn{from{transform:scale(.7)}to{transform:scale(1)}}
+
+/* leaderboard */
+.lb-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.lb-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:8px;align-items:center;padding:9px 12px;border-radius:10px;margin-bottom:6px;transition:background .2s;}
+.lb-row.gold{background:#fffde7;}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;text-align:center;}
+.lb-name{font-weight:800;font-size:.92rem;}
+.lb-correct{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);font-weight:700;}
+.lb-pts{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;color:var(--amber);}
+.lb-bar-wrap{grid-column:1/-1;padding:0 4px;}
+.lb-bar{height:5px;background:#e0f2e0;border-radius:3px;overflow:hidden;}
+.lb-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+
+/* final */
+#finalScreen{background:linear-gradient(135deg,#f1f8e9 0%,#e0f7fa 50%,#fffde7 100%);}
+.trophy{font-size:5rem;animation:float 3s ease-in-out infinite;margin-bottom:8px;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.wl{font-size:.82rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.wn{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,8vw,5rem);letter-spacing:.06em;line-height:1;background:linear-gradient(135deg,var(--amber),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.ws{color:var(--muted);font-size:.92rem;margin-bottom:28px;}
+.f-table{background:white;border-radius:20px;box-shadow:var(--shadow);width:100%;max-width:500px;overflow:hidden;margin-bottom:24px;}
+.f-hdr{background:var(--navy);padding:12px 20px;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;color:var(--lime);display:grid;grid-template-columns:44px 1fr auto auto;gap:8px;}
+.f-row{padding:13px 20px;border-bottom:1px solid #f0fff4;display:grid;grid-template-columns:44px 1fr auto auto;gap:8px;align-items:center;}
+.f-row:last-child{border:none;}
+.f-row.gold{background:#fffde7;}
+.f-place{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;text-align:center;}
+.f-name{font-weight:800;}
+.f-c{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--green);font-weight:700;}
+.f-p{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1rem;color:var(--amber);}
+.pa-btn{padding:12px 40px;background:transparent;border:3px solid var(--navy);border-radius:50px;color:var(--navy);font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.1em;cursor:pointer;transition:all .2s;}
+.pa-btn:hover{background:var(--navy);color:white;}
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div class="screen active" id="setupScreen">
+  <div class="s-logo">ENVIRONMENTAL<br>HOTSEAT</div>
+  <div class="s-sub">Facilitator Control Panel · Day 2 Icebreaker</div>
+  <div class="s-card">
+    <h2>⚙️ Game Setup</h2>
+    <p>Add team names below. Teams will select their name on their own devices via the Team QR code.</p>
+    <label class="f-label">Add Team Name</label>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <input class="f-inp" style="margin:0;flex:1" type="text" id="teamInp" placeholder="e.g. Team Alpha" maxlength="24" onkeydown="if(event.key==='Enter')addTeam()"/>
+      <button onclick="addTeam()" style="padding:12px 16px;background:var(--green);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;">+ Add</button>
+    </div>
+    <div class="teams-list" id="teamsList"></div>
+    <button class="launch-btn" onclick="launchGame()">LAUNCH HOTSEAT 🔥</button>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="screen" id="dashScreen">
+  <div class="d-hdr">
+    <span class="dh-title">🌿 ENVIRONMENTAL HOTSEAT — FACILITATOR</span>
+    <span class="dh-badge" id="dhBadge">Q 1 / 20</span>
+    <span class="dh-live"><span class="pulse"></span> LIVE</span>
+  </div>
+  <div class="d-body">
+
+    <div class="sc-card">
+      <div class="sc-round" id="scRound">Category 1</div>
+      <span class="sc-type" id="scType">🎯 Scenario</span>
+      <div class="sc-text" id="scText">Loading…</div>
+      <div class="sc-opts" id="scOpts"></div>
+      <div class="t-wrap">
+        <div class="t-row">
+          <span class="t-lbl">Time Remaining</span>
+          <span class="t-num" id="tNum">15.0s</span>
+        </div>
+        <div class="t-track"><div class="t-fill" id="tFill" style="width:100%"></div></div>
+      </div>
+      <div class="ctrl-grid" id="ctrlGrid">
+        <button class="rev-btn rev-A" onclick="reveal('A')">REVEAL A</button>
+        <button class="rev-btn rev-B" onclick="reveal('B')">REVEAL B</button>
+        <button class="rev-btn rev-C" onclick="reveal('C')">REVEAL C</button>
+        <button class="rev-btn rev-D" onclick="reveal('D')">REVEAL D</button>
+      </div>
+      <div class="spotlight" id="spotlight">
+        <span class="sp-icon" id="spIcon"></span>
+        <span id="spText"></span>
+      </div>
+      <button class="nxt-btn" id="nxtBtn" onclick="nextQ()">NEXT QUESTION →</button>
+    </div>
+
+    <div class="resp-card">
+      <div class="resp-title">⚡ Live Responses</div>
+      <div class="resp-grid" id="respGrid"></div>
+    </div>
+
+    <div class="lb-card">
+      <div class="lb-title">🏆 Leaderboard</div>
+      <div id="lbRows"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ FINAL ══ -->
+<div class="screen" id="finalScreen">
+  <div class="trophy">🏆</div>
+  <div class="wl">Overall Winner</div>
+  <div class="wn" id="winName">—</div>
+  <div class="ws" id="winScore"></div>
+  <div class="f-table">
+    <div class="f-hdr"><span>#</span><span>Team</span><span>✓</span><span>Pts</span></div>
+    <div id="fRows"></div>
+  </div>
+  <button class="pa-btn" onclick="location.reload()">↺ PLAY AGAIN</button>
+</div>
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, update, onValue }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig={apiKey:"AIzaSyB1k3crQUim9Wqxg93w-FSnCdL98uv9VUg",authDomain:"ims-mythbusters.firebaseapp.com",databaseURL:"https://ims-mythbusters-default-rtdb.firebaseio.com",projectId:"ims-mythbusters",storageBucket:"ims-mythbusters.firebasestorage.app",messagingSenderId:"747989755844",appId:"1:747989755844:web:100a50f74a216daeafa691"};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const PALETTE=[{bg:'#1565c0',light:'#e3f2fd',text:'#1565c0'},{bg:'#6a1b9a',light:'#f3e5f5',text:'#6a1b9a'},{bg:'#e65100',light:'#fff3e0',text:'#e65100'},{bg:'#c62828',light:'#ffebee',text:'#c62828'},{bg:'#00695c',light:'#e0f2f1',text:'#00695c'},{bg:'#4527a0',light:'#ede7f6',text:'#4527a0'}];
+const EMOJIS=['🦁','🐯','🦊','🐺','🦅','🐉'];
+const MEDALS=['🥇','🥈','🥉','4','5','6'];
+const TIMER=15;
+const BONUS=[5,3,1]; // 1st, 2nd, 3rd correct
+
+const QUESTIONS=[
+  // ── Category 1: Environmental Aspects & Impacts ──
+  {cat:"Environmental Aspects & Impacts",type:"Aspect Identification",
+   q:"During routine wellhead maintenance, a technician notices hydraulic fluid leaking from a valve assembly onto the ground. Under ISO 14001:2015, what is the correct classification of this situation?",
+   opts:{A:"A health and safety incident only",B:"A significant environmental aspect requiring an emergency response and incident report",C:"A minor housekeeping issue to be cleaned up and ignored",D:"An opportunity for improvement with no immediate action required"},
+   ans:"B",
+   spotlight:"ISO 14001 Clause 6.1.2 requires organisations to identify environmental aspects and determine which are significant. An uncontrolled hydrocarbon release is a significant aspect requiring immediate response and documentation."},
+  {cat:"Environmental Aspects & Impacts",type:"ISO Clause ID",
+   q:"Your company is expanding its scope to include offshore construction. Before mobilising, the HSE team must register all activities that could interact with the environment. Which ISO 14001:2015 clause specifically requires this?",
+   opts:{A:"Clause 5.1 — Leadership and Commitment",B:"Clause 7.4 — Communication",C:"Clause 6.1.2 — Environmental Aspects",D:"Clause 9.1 — Monitoring and Measurement"},
+   ans:"C",
+   spotlight:"Clause 6.1.2 is the core clause requiring identification of environmental aspects, determination of significant ones, and documentation in the Aspects & Impacts Register."},
+  {cat:"Environmental Aspects & Impacts",type:"Correct Action",
+   q:"A fabrication yard supervisor notices welding fumes are being generated in an unventilated area adjacent to a drainage channel. What is the correct action under your EMS?",
+   opts:{A:"Continue work and file a report at end of shift",B:"Stop work immediately, implement ventilation controls, and report as a near-miss environmental incident",C:"Ask workers to wear extra PPE and continue",D:"Notify the client only if the project is under a client EMS"},
+   ans:"B",
+   spotlight:"Clause 8.1 (Operational Control) requires organisations to implement controls for significant environmental aspects. Stopping work and correcting the control failure is the required action."},
+  {cat:"Environmental Aspects & Impacts",type:"Aspect Identification",
+   q:"A supply vessel is taking on fuel (bunkering) at the marine base. Which of the following is the MOST significant environmental aspect associated with this activity?",
+   opts:{A:"Engine noise from the vessel","B":"Potential hydrocarbon spill into the waterway during bunkering","C":"Fuel consumption and GHG emissions","D":"Waste paper generated during documentation"},
+   ans:"B",
+   spotlight:"While all options have environmental aspects, a hydrocarbon spill during bunkering presents the highest significance due to its potential severity and irreversibility. Clause 6.1.2 requires rating aspects by severity, frequency, and reversibility."},
+  {cat:"Environmental Aspects & Impacts",type:"Correct Action",
+   q:"Your company has just won a contract for civil works at an onshore location near a river. The EMS Coordinator has not yet updated the Aspects & Impacts Register to include this new site. What must happen before mobilisation?",
+   opts:{A:"Begin work and update the register after the first site visit",B:"Apply the existing register from a previous project as it covers general civil activities",C:"Update the Aspects & Impacts Register to include site-specific aspects and get it approved before mobilisation",D:"Only update the register if the client specifically requests it"},
+   ans:"C",
+   spotlight:"Clause 6.1.2 requires aspects to be determined for all activities within scope including new sites. Mobilising without updating the register is an EMS non-conformance."},
+
+  // ── Category 2: Legal Compliance ──
+  {cat:"Legal & Compliance Obligations",type:"ISO Clause ID",
+   q:"Your HSE Manager receives an update from NESREA about new regulations for onshore waste disposal effective next month. Which ISO 14001:2015 clause requires you to identify and track this change?",
+   opts:{A:"Clause 6.1.3 — Compliance Obligations",B:"Clause 7.3 — Awareness",C:"Clause 8.2 — Emergency Preparedness",D:"Clause 10.1 — Continual Improvement"},
+   ans:"A",
+   spotlight:"Clause 6.1.3 requires organisations to determine, have access to, and keep up to date all legal and other requirements applicable to their environmental aspects."},
+  {cat:"Legal & Compliance Obligations",type:"Correct Action",
+   q:"During an internal audit at the marine base, the auditor finds that the Legal Compliance Register has not been reviewed in 18 months and three new NUPRC regulations are not listed. What finding should the auditor raise?",
+   opts:{A:"Observation only — registers are reviewed annually so 18 months is acceptable",B:"Opportunity for Improvement — no immediate action needed",C:"Non-Conformance — failure to maintain and review compliance obligations under Clause 6.1.3",D:"No finding — legal compliance is the responsibility of the Legal department, not EMS"},
+   ans:"C",
+   spotlight:"Clause 6.1.3 requires the compliance obligations register to be kept current. A register that is 18 months old with missing regulations is a clear non-conformance."},
+  {cat:"Legal & Compliance Obligations",type:"Correct Action",
+   q:"A permit condition issued by the DPR/NUPRC requires your company to submit quarterly environmental monitoring reports. The last submission was 5 months ago. Under your EMS, what is the correct immediate action?",
+   opts:{A:"Wait until the next scheduled submission date",B:"Raise an environmental incident, submit the overdue report, and open a CAPA to prevent recurrence",C:"Notify the client only",D:"Update the monitoring plan for next year"},
+   ans:"B",
+   spotlight:"A breach of a permit condition is both a legal non-compliance and an EMS non-conformance under Clause 9.1.2 (Compliance Evaluation). Immediate corrective action and a CAPA are required."},
+
+  // ── Category 3: Emergency Preparedness ──
+  {cat:"Emergency Preparedness & Response",type:"ISO Clause ID",
+   q:"After a small diesel spill at the workshop, the response team realises the spill kit was empty and no one knew the emergency contact for NOSDRA. Which ISO 14001:2015 clause was not being met?",
+   opts:{A:"Clause 7.2 — Competence",B:"Clause 8.2 — Emergency Preparedness and Response",C:"Clause 6.2 — Environmental Objectives",D:"Clause 9.3 — Management Review"},
+   ans:"B",
+   spotlight:"Clause 8.2 requires organisations to establish, implement and maintain procedures to respond to potential environmental emergencies, including maintaining response equipment and trained personnel."},
+  {cat:"Emergency Preparedness & Response",type:"Correct Action",
+   q:"The Oil Spill Contingency Plan (OSCP) for your offshore operations has not been tested in 2 years. A new project is starting next month. What should the EMS team do?",
+   opts:{A:"Proceed with the project — the plan exists and that is sufficient",B:"Schedule and conduct an OSCP drill before mobilisation and document the results",C:"Submit the existing plan to the client without testing",D:"Create a new plan from scratch"},
+   ans:"B",
+   spotlight:"Clause 8.2 requires emergency response procedures to be tested periodically where practicable. An untested plan for 2 years, especially before a new offshore mobilisation, must be drilled and results documented."},
+
+  // ── Category 4: Monitoring & Objectives ──
+  {cat:"Monitoring, Objectives & Performance",type:"ISO Clause ID",
+   q:"Your company set an environmental objective to reduce diesel consumption across the fleet by 15% within 12 months. Six months in, no one has been tracking fuel data. Which clause is being violated?",
+   opts:{A:"Clause 5.3 — Roles and Responsibilities",B:"Clause 6.2.2 — Planning to Achieve Environmental Objectives",C:"Clause 7.5 — Documented Information",D:"Clause 4.1 — Context of the Organisation"},
+   ans:"B",
+   spotlight:"Clause 6.2.2 requires organisations to determine how results will be monitored, what indicators will be used, and who is responsible. Setting an objective without monitoring it is a non-conformance."},
+  {cat:"Monitoring, Objectives & Performance",type:"Correct Action",
+   q:"The environmental KPI dashboard shows that waste sent to landfill has increased by 40% compared to last quarter at the fabrication yard. What is the correct EMS response?",
+   opts:{A:"Note the trend and review it at next year's management review",B:"Investigate the root cause, identify corrective actions, and update the waste management plan",C:"Report it to the client only if they ask",D:"Reduce the target to match the actual performance"},
+   ans:"B",
+   spotlight:"Clause 10.2 (Corrective Action) requires organisations to investigate non-conformances and deteriorating performance trends, determine root causes, and implement corrections. Adjusting targets downward to match poor performance is not acceptable."},
+  {cat:"Monitoring, Objectives & Performance",type:"Aspect Identification",
+   q:"Which of the following is a DIRECT environmental aspect (not an impact) associated with hydrostatic testing of pipelines?",
+   opts:{A:"Potential contamination of soil and groundwater",B:"Use and discharge of large volumes of water during the test",C:"Increased operational costs",D:"Risk of pipeline failure during operation"},
+   ans:"B",
+   spotlight:"An environmental aspect is the element of an organisation's activities that interacts with the environment (Clause 6.1.2). The use and discharge of water IS the aspect. Contamination of soil and groundwater is the environmental IMPACT."},
+
+  // ── Category 5: Waste & Operational Control ──
+  {cat:"Waste Management & Operational Control",type:"Correct Action",
+   q:"At a well site, used chemical inhibitor containers are being stored in an unlabelled pile next to a drainage channel. No waste manifest has been raised. What is the correct action?",
+   opts:{A:"Leave them until the job is complete then dispose of everything together",B:"Segregate and label the containers, move them away from the drain, raise a waste manifest, and arrange licensed disposal",C:"Bury them on site to save transport costs",D:"Notify only the site supervisor"},
+   ans:"B",
+   spotlight:"Clause 8.1 requires operational controls for significant aspects including hazardous waste. Proper segregation, labelling, manifesting, and licensed disposal are all required controls under the EMS and Nigerian waste regulations."},
+  {cat:"Waste Management & Operational Control",type:"ISO Clause ID",
+   q:"Your company has a procedure for the disposal of oily waste from the workshop. A new employee bypasses this procedure and pours used engine oil down a drain. Which clause does this violate?",
+   opts:{A:"Clause 6.1.2 — Environmental Aspects",B:"Clause 8.1 — Operational Control",C:"Clause 7.3 — Awareness",D:"Clause 9.2 — Internal Audit"},
+   ans:"B",
+   spotlight:"Clause 8.1 requires organisations to implement and control processes by following established procedures. Bypassing a documented waste disposal procedure is a direct non-conformance with Clause 8.1."},
+  {cat:"Waste Management & Operational Control",type:"Correct Action",
+   q:"During a vessel inspection, the auditor finds that bilge water has been discharged without treatment or a record of the discharge. The vessel is operating in Nigerian coastal waters. What finding is raised?",
+   opts:{A:"Observation only — bilge water is not covered by ISO 14001",B:"Major Non-Conformance — failure of operational control for a significant environmental aspect with potential legal non-compliance under MARPOL",C:"Minor Non-Conformance — record-keeping only",D:"No finding — this is a maritime matter not covered by EMS"},
+   ans:"B",
+   spotlight:"Untreated bilge water discharge is both a failure of Clause 8.1 (Operational Control) and a potential violation of MARPOL and NIMASA regulations. Combined with missing records (Clause 7.5), this warrants a Major NC."},
+
+  // ── Category 6: Leadership & IMS Integration ──
+  {cat:"Leadership, Roles & IMS",type:"ISO Clause ID",
+   q:"The CEO of your company signs the Environmental Policy but never participates in management reviews and has not allocated a budget for EMS training. Which ISO 14001:2015 clause is most directly not being met?",
+   opts:{A:"Clause 6.1.1 — Risks and Opportunities",B:"Clause 5.1 — Leadership and Commitment",C:"Clause 8.1 — Operational Control",D:"Clause 4.2 — Interested Parties"},
+   ans:"B",
+   spotlight:"Clause 5.1 places direct obligations on top management — not just signing the policy but actively demonstrating commitment through participation, resource allocation, and championing the EMS culture."},
+  {cat:"Leadership, Roles & IMS",type:"Correct Action",
+   q:"Your company is moving toward IMS. The QMS Document Controller currently manages all ISO 9001 documents. What is the correct approach to expand this role for EMS?",
+   opts:{A:"Create a separate EMS document controller to avoid confusion",B:"Update the Document Controller's job description and training to include EMS documentation under the same integrated document control system",C:"Ask HSE to manage all EMS documents separately",D:"Outsource document control to the consultant"},
+   ans:"B",
+   spotlight:"Clause 7.5 (Documented Information) applies across all three ISO standards. Integrating document control under one role with an expanded scope is the correct IMS approach — avoiding duplication and ensuring consistency."},
+  {cat:"Leadership, Roles & IMS",type:"Aspect Identification",
+   q:"Your company provides Solid Minerals Mining services. Which of the following is the MOST significant environmental aspect unique to this service line compared to wellhead maintenance?",
+   opts:{A:"Use of diesel-powered vehicles",B:"Generation of office waste",C:"Large-scale land disturbance, vegetation clearing, and potential acid mine drainage",D:"Use of personal protective equipment"},
+   ans:"C",
+   spotlight:"Solid Minerals Mining involves land disturbance on a scale far exceeding other service lines. Vegetation clearing, topsoil removal, and acid mine drainage are aspects of high significance requiring specific environmental management plans."},
+  {cat:"Leadership, Roles & IMS",type:"Correct Action",
+   q:"A client audits your company and finds that your EMS scope statement does not include your Abuja office even though it handles procurement for all environmental-sensitive activities. What must you do?",
+   opts:{A:"Explain that the Abuja office is administrative and therefore excluded",B:"Review and update the EMS scope to include the Abuja office, update affected registers and documents accordingly",C:"Create a separate EMS for the Abuja office",D:"Ask the client to exclude this finding from their report"},
+   ans:"B",
+   spotlight:"Clause 4.3 requires the scope to reflect the organisation's activities, products and services within its control. A procurement function handling environmentally significant activities must be included in the EMS scope."},
+  {cat:"Leadership, Roles & IMS",type:"ISO Clause ID",
+   q:"After completing the EMS Internal Audit, the lead auditor presents the findings report to the MD and recommends three corrective actions. The MD files the report but takes no action for 4 months. Which clause is being violated?",
+   opts:{A:"Clause 9.2 — Internal Audit",B:"Clause 10.2 — Nonconformity and Corrective Action",C:"Clause 7.4 — Communication",D:"Clause 6.2 — Environmental Objectives"},
+   ans:"B",
+   spotlight:"Clause 10.2 requires organisations to take action to control and correct non-conformances and implement corrective actions in a timely manner. Four months of inaction on audit findings is a non-conformance with Clause 10.2."},
+];
+
+let teams=[];
+let currentQ=0;
+let timerInt=null;
+let timeLeft=TIMER;
+let revealed=false;
+let respListener=null;
+let correctRanking=[];
+
+let actx;
+const ac=()=>{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;};
+function playCorrect(){try{const c=ac();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';const t=c.currentTime+i*.1;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.3);});}catch(e){}}
+function playWrong(){try{const c=ac();[180,150,120].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sawtooth';const t=c.currentTime+i*.18;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.start(t);o.stop(t+.25);});}catch(e){}}
+
+window.addTeam=function(){
+  const inp=document.getElementById('teamInp');
+  const name=inp.value.trim();
+  if(!name)return;
+  if(teams.find(t=>t.name.toLowerCase()===name.toLowerCase())){alert('Name taken.');return;}
+  if(teams.length>=6){alert('Max 6 teams.');return;}
+  const idx=teams.length;
+  teams.push({name,color:PALETTE[idx],emoji:EMOJIS[idx],score:0,correct:0});
+  inp.value='';renderTeamsList();
+};
+function renderTeamsList(){
+  document.getElementById('teamsList').innerHTML=teams.map((t,i)=>`
+    <div class="team-item" style="border-color:${t.color.bg};background:${t.color.light};color:${t.color.text}">
+      ${t.emoji} ${t.name}
+      <button class="rm-btn" onclick="removeTeam(${i})">✕</button>
+    </div>`).join('');
+}
+window.removeTeam=function(i){teams.splice(i,1);teams.forEach((t,j)=>{t.color=PALETTE[j];t.emoji=EMOJIS[j];});renderTeamsList();};
+
+window.launchGame=async function(){
+  if(teams.length<2){alert('Add at least 2 teams.');return;}
+  await set(ref(db,'hotseat'),{
+    status:'active',currentQ:0,questionActive:false,revealed:false,
+    teams:Object.fromEntries(teams.map((t,i)=>[`team_${i}`,{name:t.name,emoji:t.emoji,colorBg:t.color.bg,colorLight:t.color.light,colorText:t.color.text,score:0,correct:0}])),
+  });
+  showScreen('dashScreen');
+  startQ();
+};
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+async function startQ(){
+  if(currentQ>=QUESTIONS.length){endGame();return;}
+  const q=QUESTIONS[currentQ];
+  revealed=false;correctRanking=[];
+  timeLeft=TIMER;
+  document.getElementById('dhBadge').textContent=`Q ${currentQ+1} / ${QUESTIONS.length}`;
+  document.getElementById('scRound').textContent=q.cat;
+  document.getElementById('scType').textContent='🎯 '+q.type;
+  document.getElementById('scText').textContent=q.q;
+  renderOpts(q,null);
+  document.getElementById('spotlight').className='spotlight';
+  document.getElementById('nxtBtn').classList.remove('show');
+  document.getElementById('ctrlGrid').style.display='grid';
+  updateTimerUI();
+  await set(ref(db,'hotseat/responses'),null);
+  await update(ref(db,'hotseat'),{status:'active',currentQ,questionActive:true,revealed:false,questionText:q.q,questionCat:q.cat,questionType:q.type,questionOpts:q.opts,questionStart:Date.now()});
+  buildRespGrid();
+  listenResponses();
+  clearInterval(timerInt);
+  const startTs=Date.now();
+  timerInt=setInterval(()=>{timeLeft=Math.max(0,TIMER-((Date.now()-startTs)/1000));updateTimerUI();if(timeLeft<=0){clearInterval(timerInt);if(!revealed)reveal(QUESTIONS[currentQ].ans,true);}},100);
+}
+
+function renderOpts(q,correctAns){
+  const letters=['A','B','C','D'];
+  document.getElementById('scOpts').innerHTML=Object.entries(q.opts).map(([k,v])=>`
+    <div class="sc-opt ${correctAns?( k===correctAns?'reveal-correct':'reveal-wrong'):''}" id="opt-${k}">
+      <span class="sc-opt-ltr">${k}</span><span>${v}</span>
+    </div>`).join('');
+}
+
+function updateTimerUI(){
+  const pct=timeLeft/TIMER;
+  const fill=document.getElementById('tFill');
+  fill.style.width=(pct*100)+'%';
+  fill.style.background=pct>.6?'linear-gradient(90deg,#00c853,#00bcd4)':pct>.3?'linear-gradient(90deg,#ff8f00,#ffd600)':'linear-gradient(90deg,#e53935,#ff5722)';
+  document.getElementById('tNum').textContent=timeLeft.toFixed(1)+'s';
+}
+
+function buildRespGrid(){
+  document.getElementById('respGrid').innerHTML=teams.map((t,i)=>`
+    <div class="r-chip r-pending" id="rc-${i}" style="border-color:${t.color.bg}30">
+      ${t.emoji} ${t.name} <span id="rv-${i}">—</span>
+    </div>`).join('');
+}
+
+function listenResponses(){
+  if(respListener)respListener();
+  respListener=onValue(ref(db,'hotseat/responses'),snap=>{
+    if(!snap.exists())return;
+    const data=snap.val();
+    teams.forEach((t,i)=>{
+      const key=`team_${i}`;
+      if(data[key]){
+        const r=data[key];
+        const chip=document.getElementById(`rc-${i}`);
+        const val=document.getElementById(`rv-${i}`);
+        if(chip){chip.className='r-chip r-in';chip.style.borderColor=t.color.bg;}
+        if(val) val.textContent=`${r.answer} · ${parseFloat(r.time).toFixed(1)}s`;
+      }
+    });
+  });
+}
+
+window.reveal=async function(correctAns,autoReveal=false){
+  if(revealed)return;
+  revealed=true;
+  clearInterval(timerInt);
+  document.getElementById('ctrlGrid').style.display='none';
+
+  const q=QUESTIONS[currentQ];
+  renderOpts(q,correctAns);
+
+  const snap=await get(ref(db,'hotseat/responses'));
+  const responses=snap.exists()?snap.val():{};
+
+  // Sort correct answers by time
+  const correctTeams=[];
+  teams.forEach((t,i)=>{
+    const r=responses[`team_${i}`];
+    if(r && r.answer===correctAns){
+      correctTeams.push({idx:i,time:parseFloat(r.time)});
+    }
+  });
+  correctTeams.sort((a,b)=>a.time-b.time);
+
+  const updates={};
+  let hasCorrect=false;
+  correctTeams.forEach((ct,rank)=>{
+    const pts=BONUS[rank]||0;
+    if(pts>0){
+      teams[ct.idx].score+=pts;
+      teams[ct.idx].correct++;
+      updates[`hotseat/teams/team_${ct.idx}/score`]=teams[ct.idx].score;
+      updates[`hotseat/teams/team_${ct.idx}/correct`]=teams[ct.idx].correct;
+      hasCorrect=true;
+    }
+    const chip=document.getElementById(`rc-${ct.idx}`);
+    const val=document.getElementById(`rv-${ct.idx}`);
+    if(chip){chip.className='r-chip r-correct';chip.style.borderColor='#00897b';}
+    if(val) val.textContent=pts>0?`✅ +${pts}pts (${rank===0?'1st':rank===1?'2nd':'3rd'})`:`✅ correct`;
+  });
+
+  // Mark wrong responses
+  teams.forEach((t,i)=>{
+    const r=responses[`team_${i}`];
+    if(r && r.answer!==correctAns){
+      const chip=document.getElementById(`rc-${i}`);
+      if(chip){chip.className='r-chip r-wrong';chip.style.borderColor='#e53935';}
+    }
+  });
+
+  if(hasCorrect) playCorrect(); else playWrong();
+
+  await update(ref(db,'hotseat'),{revealed:true,correctAnswer:correctAns,...updates});
+
+  // Clause spotlight
+  const sp=document.getElementById('spotlight');
+  document.getElementById('spIcon').textContent='📋';
+  document.getElementById('spText').innerHTML=`<strong>Clause Spotlight:</strong> ${q.spotlight}`;
+  sp.className='spotlight show correct';
+
+  renderLeaderboard();
+  document.getElementById('nxtBtn').classList.add('show');
+};
+
+function renderLeaderboard(){
+  const sorted=[...teams].map((t,i)=>({...t,idx:i})).sort((a,b)=>b.score-a.score);
+  const max=sorted[0]?.score||1;
+  document.getElementById('lbRows').innerHTML=sorted.map((t,rank)=>`
+    <div class="lb-row ${rank===0?'gold':''}">
+      <span class="lb-rank">${MEDALS[rank]||rank+1}</span>
+      <span class="lb-name" style="color:${t.color.text}">${t.emoji} ${t.name}</span>
+      <span class="lb-correct">${t.correct}✓</span>
+      <span class="lb-pts">${t.score}</span>
+      <div class="lb-bar-wrap"><div class="lb-bar"><div class="lb-bar-fill" style="width:${max>0?(t.score/max*100):0}%;background:${t.color.bg}"></div></div></div>
+    </div>`).join('');
+}
+
+window.nextQ=function(){currentQ++;startQ();};
+
+async function endGame(){
+  await update(ref(db,'hotseat'),{status:'finished'});
+  if(respListener)respListener();
+  showScreen('finalScreen');
+  const sorted=[...teams].sort((a,b)=>b.score-a.score);
+  const w=sorted[0];
+  document.getElementById('winName').textContent=w.emoji+' '+w.name;
+  document.getElementById('winScore').textContent=`${w.score} points · ${w.correct} correct answers`;
+  const places=['🥇','🥈','🥉'];
+  document.getElementById('fRows').innerHTML=sorted.map((t,i)=>`
+    <div class="f-row ${i===0?'gold':''}">
+      <span class="f-place">${places[i]||'#'+(i+1)}</span>
+      <span class="f-name" style="color:${t.color.text}">${t.emoji} ${t.name}</span>
+      <span class="f-c">${t.correct}✓</span>
+      <span class="f-p">${t.score}pts</span>
+    </div>`).join('');
+  fireConfetti();
+}
+function fireConfetti(){
+  const w=document.getElementById('confettiWrap');
+  const cols=['#00c853','#00bcd4','#ffd600','#ff8f00','#69f0ae','#ffffff'];
+  for(let i=0;i<140;i++){const el=document.createElement('div');el.style.cssText=`position:absolute;top:-12px;left:${Math.random()*100}%;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation:cf ${2+Math.random()*3}s ${Math.random()*2}s linear forwards;`;w.appendChild(el);setTimeout(()=>el.remove(),6000);}
+}
+const cs=document.createElement('style');cs.textContent='@keyframes cf{to{transform:translateY(110vh) rotate(720deg);opacity:0}}';document.head.appendChild(cs);
+</script>
+</body>
+</html>
